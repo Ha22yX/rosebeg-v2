@@ -115,6 +115,8 @@ describe("windowReducer", () => {
 
     expect(closed.windows.map(({ id }) => id)).toEqual(["w1"]);
     expect(closed.activeWindowId).toBe("w1");
+    expect(closed.windowDefinitions).not.toHaveProperty("w2");
+    expect(closed.windowCascadeIndexes).not.toHaveProperty("w2");
     expect(windowReducer(closed, { type: "CLOSE_ALL" })).toMatchObject({
       windows: [],
       activeWindowId: null,
@@ -188,6 +190,37 @@ describe("windowReducer", () => {
     });
 
     expect(recovered.windows[0]).toMatchObject({
+      mode: "normal",
+      bounds: { x: 50, y: 40, width: 900, height: 620 },
+      restoreBounds: { x: 50, y: 40, width: 900, height: 620 },
+    });
+  });
+
+  it("refits a minimized zero-size launch before taskbar restore", () => {
+    const unavailable = windowReducer(initialWindowState, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 0, height: 0 },
+    });
+    const launched = windowReducer(unavailable, {
+      type: "LAUNCH",
+      id: "w1",
+      definition: projectWindowDefinition,
+      payload: {},
+    });
+    const minimized = windowReducer(launched, {
+      type: "MINIMIZE",
+      id: "w1",
+    });
+    const desktopAvailable = windowReducer(minimized, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 1000, height: 700 },
+    });
+    const restored = windowReducer(desktopAvailable, {
+      type: "TOGGLE_TASKBAR",
+      id: "w1",
+    });
+
+    expect(restored.windows[0]).toMatchObject({
       mode: "normal",
       bounds: { x: 50, y: 40, width: 900, height: 620 },
       restoreBounds: { x: 50, y: 40, width: 900, height: 620 },

@@ -107,11 +107,6 @@ export function windowReducer(
       return {
         ...state,
         windows,
-        windowDefinitions: withoutKey(state.windowDefinitions, action.id),
-        windowCascadeIndexes: withoutKey(
-          state.windowCascadeIndexes,
-          action.id,
-        ),
         activeWindowId:
           state.activeWindowId === action.id
             ? topVisibleWindowId(windows)
@@ -179,6 +174,11 @@ export function windowReducer(
       return {
         ...state,
         windows,
+        windowDefinitions: withoutKey(state.windowDefinitions, action.id),
+        windowCascadeIndexes: withoutKey(
+          state.windowCascadeIndexes,
+          action.id,
+        ),
         activeWindowId:
           state.activeWindowId === action.id
             ? topVisibleWindowId(windows)
@@ -206,12 +206,20 @@ export function windowReducer(
           if (windowInstance.mode === "maximized") {
             return { ...windowInstance, bounds: desktopRect(size) };
           }
-          if (windowInstance.mode !== "normal") return windowInstance;
           const definition = state.windowDefinitions[windowInstance.id];
           const mustRecover =
             desktopWasUnavailable ||
             windowInstance.bounds.width === 0 ||
             windowInstance.bounds.height === 0;
+          if (windowInstance.mode !== "normal") {
+            if (!mustRecover || !definition) return windowInstance;
+            const bounds = fitInitialBounds(
+              definition,
+              size,
+              state.windowCascadeIndexes[windowInstance.id] ?? 0,
+            );
+            return { ...windowInstance, bounds, restoreBounds: bounds };
+          }
           const bounds =
             mustRecover && definition
               ? fitInitialBounds(
