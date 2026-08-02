@@ -6,8 +6,30 @@ body,
   height: 100%;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   overflow: hidden;
+}
+
+body {
+  min-width: 280px;
+  min-height: 260px;
+  background: #000;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+.app-root {
+  position: relative;
+  min-height: 100dvh;
 }

@@ -8,6 +8,7 @@ export type XpDialogProps = {
   actions?: ReactNode;
   onClose?: () => void;
   className?: string;
+  modal?: boolean;
 };
 
 export function XpDialog({
@@ -16,11 +17,13 @@ export function XpDialog({
   actions,
   onClose,
   className = "",
+  modal = false,
 }: XpDialogProps) {
   const titleId = useId();
 
   return (
     <section
+      aria-modal={modal || undefined}
       aria-labelledby={titleId}
       className={["xp-dialog", className].filter(Boolean).join(" ")}
       role="dialog"

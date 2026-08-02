@@ -1,0 +1,705 @@
+.desktop-shell {
+  --taskbar-height: 32px;
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 260px;
+  overflow: hidden;
+  color: var(--xp-text);
+  background: #3b79c9;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+}
+
+.desktop-background {
+  position: absolute;
+  inset: 0 0 var(--taskbar-height);
+  overflow: hidden;
+  background-color: #3c83d1;
+  background-image: url("/assets/wallpaper/rosebeg-bliss.webp");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.desktop-icons {
+  display: grid;
+  width: 86px;
+  padding: 11px 8px;
+  grid-auto-rows: 82px;
+  grid-template-columns: 74px;
+}
+
+.desktop-icon {
+  display: grid;
+  width: 74px;
+  min-width: 0;
+  height: 78px;
+  padding: 3px 2px 2px;
+  place-items: start center;
+  align-content: start;
+  gap: 2px;
+  border: 1px solid transparent;
+  color: #fff;
+  background: transparent;
+  font: 11px/14px Tahoma, "Segoe UI", sans-serif;
+  text-align: center;
+  text-shadow: 1px 1px 2px #001a3e, -1px 0 1px rgb(0 0 0 / 45%);
+  cursor: default;
+  user-select: none;
+}
+
+.desktop-icon__image {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 35%));
+  pointer-events: none;
+}
+
+.desktop-icon span {
+  display: inline;
+  padding: 1px 2px;
+}
+
+.desktop-icon:hover,
+.desktop-icon:focus {
+  border-color: rgb(180 214 255 / 45%);
+  background: rgb(34 91 184 / 38%);
+  outline: none;
+}
+
+.desktop-icon:focus-visible span {
+  outline: 1px dotted #fff;
+  outline-offset: 1px;
+}
+
+.desktop-icon:active {
+  background: rgb(19 72 164 / 52%);
+}
+
+.system-root > .window-manager__layer {
+  inset: 0 0 var(--taskbar-height, 32px);
+  z-index: 100;
+}
+
+.start-menu {
+  position: absolute;
+  z-index: 300;
+  bottom: 30px;
+  left: 0;
+  display: grid;
+  width: min(388px, calc(100vw - 8px));
+  max-height: calc(100dvh - 42px);
+  overflow: hidden;
+  border: 2px solid #0f4ea5;
+  border-radius: 7px 7px 0 0;
+  background: #fff;
+  box-shadow: 3px -3px 12px rgb(0 0 0 / 30%);
+  grid-template-rows: 58px minmax(0, 1fr) 44px;
+}
+
+.start-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 2px solid #ed8c38;
+  color: #fff;
+  background: linear-gradient(100deg, #1d62be, #3d96ea 72%, #1764c4);
+  font-size: 18px;
+  text-shadow: 1px 1px #1a3c78;
+}
+
+.start-menu__avatar {
+  display: grid;
+  box-sizing: border-box;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  color: #fff;
+  background: linear-gradient(145deg, #f4b445, #d75d18);
+  box-shadow: 1px 1px 3px rgb(0 0 0 / 30%);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.start-menu__columns {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: 53% 47%;
+}
+
+.start-menu__primary,
+.start-menu__places {
+  min-width: 0;
+  padding: 7px 5px;
+}
+
+.start-menu__primary {
+  display: grid;
+  align-content: start;
+  background: #fff;
+}
+
+.start-menu__places {
+  border-left: 1px solid #9bb7dc;
+  background: linear-gradient(90deg, #d6e8fc, #c5ddf8);
+}
+
+.start-menu__item {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  border: 1px solid transparent;
+  color: #14284d;
+  background: transparent;
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+  text-align: left;
+  text-decoration: none;
+  cursor: default;
+}
+
+.start-menu__item:hover,
+.start-menu__item:focus-visible {
+  border-color: #2e6fbd;
+  color: #fff;
+  background: #316ac5;
+  outline: none;
+}
+
+.start-menu__item--primary {
+  min-height: 50px;
+  gap: 7px;
+  padding: 4px 5px;
+}
+
+.start-menu__item--primary > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.start-menu__item--primary strong,
+.start-menu__item--place strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-menu__item--primary small {
+  overflow: hidden;
+  color: #6b6b6b;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-menu__item--primary:hover small,
+.start-menu__item--primary:focus-visible small {
+  color: #fff;
+}
+
+.start-menu__item--place {
+  min-height: 40px;
+  gap: 7px;
+  padding: 5px 6px;
+}
+
+.start-menu__divider {
+  display: block;
+  height: 1px;
+  margin: 4px 8px;
+  background: #8eb2dc;
+  box-shadow: 0 1px #fff;
+}
+
+.start-menu__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 5px 7px;
+  border-top: 1px solid #4b8bd4;
+  background: linear-gradient(#3d92e4, #1b65bc);
+}
+
+.start-menu__power-action {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px;
+  border: 1px solid transparent;
+  color: #fff;
+  background: transparent;
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+  cursor: default;
+}
+
+.start-menu__power-action:hover,
+.start-menu__power-action:focus-visible {
+  border-color: #d8ecff;
+  background: #14549e;
+  outline: 1px dotted #fff;
+  outline-offset: -3px;
+}
+
+.start-menu__power-icon {
+  position: relative;
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  box-shadow: inset 1px 1px rgb(255 255 255 / 55%);
+}
+
+.start-menu__power-icon--logoff {
+  background: linear-gradient(135deg, #ffd753, #d58a00);
+}
+
+.start-menu__power-icon--logoff::after {
+  position: absolute;
+  inset: 5px;
+  border: 1px solid #fff;
+  content: "";
+}
+
+.start-menu__power-icon--off {
+  background: linear-gradient(135deg, #ff8a72, #d82f19);
+}
+
+.start-menu__power-icon--off::before {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  width: 3px;
+  height: 8px;
+  border-radius: 2px;
+  background: #fff;
+  content: "";
+}
+
+.start-menu__power-icon--off::after {
+  position: absolute;
+  inset: 5px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  content: "";
+}
+
+.taskbar {
+  position: absolute;
+  z-index: 400;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  box-sizing: border-box;
+  height: var(--taskbar-height);
+  align-items: stretch;
+  border-top: 1px solid #5eb6ff;
+  color: #fff;
+  background: linear-gradient(#2f8cf3 0 8%, #1769d4 20%, #0a55c7 82%, #0b3f9f);
+  box-shadow: inset 0 1px rgb(255 255 255 / 25%);
+}
+
+.taskbar__start {
+  position: relative;
+  display: flex;
+  width: 92px;
+  min-width: 80px;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 15px 2px 9px;
+  border: 0;
+  border-right: 1px solid #0d5b1e;
+  border-radius: 0 12px 12px 0;
+  color: #fff;
+  background: linear-gradient(90deg, #3c9a35, #57b948 55%, #178a2c);
+  box-shadow: inset 1px 1px 2px rgb(255 255 255 / 55%), 2px 0 3px rgb(0 0 0 / 25%);
+  font: italic 700 17px Tahoma, "Segoe UI", sans-serif;
+  text-shadow: 1px 1px 1px #1b641f;
+  cursor: default;
+}
+
+.taskbar__start:hover,
+.taskbar__start:focus-visible {
+  background: linear-gradient(90deg, #48a93f, #6bc859 55%, #219936);
+  outline: 1px dotted #fff;
+  outline-offset: -5px;
+}
+
+.taskbar__start.is-open,
+.taskbar__start:active {
+  padding-top: 3px;
+  background: linear-gradient(90deg, #227c2a, #3a9639 55%, #126e24);
+  box-shadow: inset 2px 2px 4px rgb(0 0 0 / 35%);
+}
+
+.taskbar__start-mark {
+  display: grid;
+  width: 19px;
+  height: 17px;
+  flex: 0 0 auto;
+  gap: 1px;
+  filter: drop-shadow(1px 1px rgb(0 0 0 / 30%));
+  grid-template-columns: 1fr 1fr;
+  transform: skew(-7deg);
+}
+
+.taskbar__start-mark i:nth-child(1) { background: #f04b35; }
+.taskbar__start-mark i:nth-child(2) { background: #75ba37; }
+.taskbar__start-mark i:nth-child(3) { background: #3b88d8; }
+.taskbar__start-mark i:nth-child(4) { background: #ffd23c; }
+
+.taskbar__tasks {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex: 1;
+  gap: 3px;
+  padding: 2px 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.taskbar__tasks::-webkit-scrollbar {
+  display: none;
+}
+
+.taskbar__task {
+  display: flex;
+  min-width: 42px;
+  max-width: 164px;
+  height: 26px;
+  align-items: center;
+  flex: 1 1 145px;
+  gap: 5px;
+  padding: 2px 7px;
+  overflow: hidden;
+  border: 1px solid #174994;
+  border-radius: 2px;
+  color: #fff;
+  background: linear-gradient(#4696ed, #2775d4);
+  box-shadow: inset 1px 1px rgb(255 255 255 / 24%);
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+  text-align: left;
+  text-shadow: 1px 1px #184378;
+  cursor: default;
+}
+
+.taskbar__task span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskbar__task:hover,
+.taskbar__task:focus-visible {
+  border-color: #8fc6ff;
+  background: linear-gradient(#63aaff, #347fdc);
+  outline: 1px dotted #fff;
+  outline-offset: -4px;
+}
+
+.taskbar__task.is-active {
+  border-color: #073374;
+  background: linear-gradient(#145bb7, #1e65bd);
+  box-shadow: inset 1px 2px 3px rgb(0 0 0 / 38%);
+}
+
+.taskbar__task.is-minimized {
+  color: #dbe9fb;
+  background: linear-gradient(#367fcf, #2167b7);
+}
+
+.taskbar__tray {
+  display: flex;
+  width: 96px;
+  flex: 0 0 96px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 0 8px;
+  border-left: 1px solid #0f55a6;
+  background: linear-gradient(#20a4ee, #0b83d5);
+  box-shadow: inset 1px 0 rgb(255 255 255 / 24%);
+  font-size: 10px;
+}
+
+.taskbar__tray-status {
+  position: relative;
+  width: 13px;
+  height: 13px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #3ab33e;
+  box-shadow: inset 1px 1px 2px rgb(255 255 255 / 70%);
+}
+
+.taskbar__tray-status::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 5px;
+  height: 3px;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  content: "";
+  transform: rotate(-45deg);
+}
+
+.taskbar__tray time {
+  width: 60px;
+  flex: 0 0 60px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.power-dialog-backdrop {
+  position: absolute;
+  z-index: 500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgb(9 35 86 / 30%);
+}
+
+.power-dialog-backdrop--turnoff {
+  background: rgb(20 48 106 / 45%);
+}
+
+.power-dialog {
+  width: min(420px, calc(100vw - 30px));
+}
+
+.power-dialog--turnoff {
+  width: min(480px, calc(100vw - 30px));
+}
+
+.power-dialog__message {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+}
+
+.power-dialog__message p,
+.power-dialog__prompt {
+  margin: 0;
+  font-size: 12px;
+}
+
+.power-dialog__symbol,
+.power-dialog__choice-icon {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  box-shadow: 1px 2px 3px rgb(0 0 0 / 35%), inset 1px 1px 2px rgb(255 255 255 / 55%);
+}
+
+.power-dialog__symbol {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+}
+
+.power-dialog__symbol--logoff {
+  background: linear-gradient(135deg, #ffd75a, #d88900);
+}
+
+.power-dialog__symbol--logoff::after {
+  position: absolute;
+  inset: 9px;
+  border: 2px solid #fff;
+  content: "";
+}
+
+.power-dialog__prompt {
+  padding: 2px 2px 12px;
+  text-align: center;
+}
+
+.power-dialog__choices {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 4px 8px 8px;
+}
+
+.power-dialog__choices button {
+  display: grid;
+  width: 78px;
+  justify-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid transparent;
+  color: #111;
+  background: transparent;
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+  cursor: default;
+}
+
+.power-dialog__choices button:hover,
+.power-dialog__choices button:focus-visible {
+  border-color: #316ac5;
+  background: #d8e8fb;
+  outline: 1px dotted #183d78;
+  outline-offset: -4px;
+}
+
+.power-dialog__choice-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 9px;
+}
+
+.power-dialog__choice-icon--off {
+  background: linear-gradient(135deg, #ff8b76, #d52f1a);
+}
+
+.power-dialog__choice-icon--off::before {
+  position: absolute;
+  top: 8px;
+  left: 22px;
+  width: 5px;
+  height: 20px;
+  border-radius: 3px;
+  background: #fff;
+  content: "";
+}
+
+.power-dialog__choice-icon--off::after {
+  position: absolute;
+  inset: 12px;
+  border: 4px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  content: "";
+}
+
+.power-dialog__choice-icon--restart {
+  background: linear-gradient(135deg, #8ad067, #30912c);
+}
+
+.power-dialog__choice-icon--restart::after {
+  position: absolute;
+  inset: 11px;
+  border: 5px solid #fff;
+  border-left-color: transparent;
+  border-radius: 50%;
+  content: "";
+}
+
+.power-dialog__cancel {
+  min-width: 76px;
+}
+
+@media (max-width: 520px) {
+  .desktop-icons {
+    width: 82px;
+    padding: 12px;
+    grid-auto-rows: 80px;
+  }
+
+  .start-menu {
+    right: 4px;
+    left: 4px;
+    width: auto;
+  }
+
+  .start-menu__columns {
+    grid-template-columns: 55% 45%;
+  }
+
+  .start-menu__item--primary {
+    min-height: 47px;
+  }
+
+  .start-menu__item--primary small {
+    display: none;
+  }
+
+  .taskbar__start {
+    width: 78px;
+    min-width: 72px;
+    padding-right: 10px;
+    padding-left: 7px;
+  }
+
+  .taskbar__tasks {
+    gap: 2px;
+    padding-inline: 3px;
+  }
+
+  .taskbar__task {
+    padding-inline: 5px;
+  }
+
+  .taskbar__task span {
+    display: none;
+  }
+
+  .taskbar__tray {
+    width: 80px;
+    flex-basis: 80px;
+    gap: 3px;
+    padding-inline: 5px;
+  }
+
+  .taskbar__tray time {
+    width: 56px;
+    flex-basis: 56px;
+  }
+
+  .power-dialog__choices {
+    gap: 22px;
+  }
+}
+
+@media (max-height: 560px) {
+  .start-menu {
+    grid-template-rows: 50px minmax(0, 1fr) 40px;
+  }
+
+  .start-menu__header {
+    padding-block: 4px;
+  }
+
+  .start-menu__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .start-menu__primary,
+  .start-menu__places {
+    padding-block: 3px;
+  }
+
+  .start-menu__item--primary {
+    min-height: 43px;
+  }
+
+  .start-menu__item--place {
+    min-height: 34px;
+  }
+}
+
+@media (forced-colors: active) {
+  .desktop-icon,
+  .taskbar__start,
+  .taskbar__task,
+  .start-menu__item,
+  .start-menu__power-action {
+    forced-color-adjust: none;
+  }
+}
