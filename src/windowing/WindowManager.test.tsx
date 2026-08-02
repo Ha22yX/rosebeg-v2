@@ -209,6 +209,30 @@ describe("WindowManagerProvider", () => {
     });
   });
 
+  it("keeps every resize hit target inside the frame boundary", async () => {
+    const user = userEvent.setup();
+    const { container } = renderManager();
+    await user.click(screen.getByRole("button", { name: "Launch project" }));
+    const expectedEdges = {
+      north: { top: "0px" },
+      northeast: { top: "0px", right: "0px" },
+      east: { right: "0px" },
+      southeast: { right: "0px", bottom: "0px" },
+      south: { bottom: "0px" },
+      southwest: { bottom: "0px", left: "0px" },
+      west: { left: "0px" },
+      northwest: { top: "0px", left: "0px" },
+    } as const;
+
+    for (const [direction, edges] of Object.entries(expectedEdges)) {
+      const handle = container.querySelector<HTMLElement>(
+        `.xp-window__resize--${direction}`,
+      );
+      if (!handle) throw new Error(`${direction} resize handle was not rendered`);
+      expect(handle).toHaveStyle(edges);
+    }
+  });
+
   it("toggles maximize and restore by double-clicking the title bar", async () => {
     const user = userEvent.setup();
     renderManager();

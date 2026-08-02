@@ -9,6 +9,8 @@ import type {
 
 export type WindowState = {
   windows: WindowInstance[];
+  windowDefinitions: Record<string, WindowDefinition>;
+  windowCascadeIndexes: Record<string, number>;
   activeWindowId: string | null;
   desktopSize: DesktopSize;
   nextCascadeIndex: number;
@@ -35,6 +37,8 @@ export type WindowAction =
 
 export const initialWindowState: WindowState = {
   windows: [],
+  windowDefinitions: {},
+  windowCascadeIndexes: {},
   activeWindowId: null,
   desktopSize: { width: 1024, height: 768 },
   nextCascadeIndex: 0,
@@ -67,6 +71,14 @@ export function windowReducer(
       return {
         ...state,
         windows: [...state.windows, instance],
+        windowDefinitions: {
+          ...state.windowDefinitions,
+          [instance.id]: action.definition,
+        },
+        windowCascadeIndexes: {
+          ...state.windowCascadeIndexes,
+          [instance.id]: state.nextCascadeIndex,
+        },
         activeWindowId: instance.id,
         nextCascadeIndex: state.nextCascadeIndex + 1,
         nextZIndex: state.nextZIndex + 1,
@@ -95,6 +107,11 @@ export function windowReducer(
       return {
         ...state,
         windows,
+        windowDefinitions: withoutKey(state.windowDefinitions, action.id),
+        windowCascadeIndexes: withoutKey(
+          state.windowCascadeIndexes,
+          action.id,
+        ),
         activeWindowId:
           state.activeWindowId === action.id
             ? topVisibleWindowId(windows)
@@ -170,9 +187,17 @@ export function windowReducer(
     }
     case "CLOSE_ALL":
       if (state.windows.length === 0) return state;
-      return { ...state, windows: [], activeWindowId: null };
+      return {
+        ...state,
+        windows: [],
+        windowDefinitions: {},
+        windowCascadeIndexes: {},
+        activeWindowId: null,
+      };
     case "SET_DESKTOP_SIZE": {
       const size = normalizeDesktopSize(action.size);
+      const desktopWasUnavailable =
+        state.desktopSize.width <= 24 || state.desktopSize.height <= 24;
 
       return {
         ...state,
@@ -182,7 +207,19 @@ export function windowReducer(
             return { ...windowInstance, bounds: desktopRect(size) };
           }
           if (windowInstance.mode !== "normal") return windowInstance;
-          const bounds = clampBounds(windowInstance.bounds, size);
+          const definition = state.windowDefinitions[windowInstance.id];
+          const mustRecover =
+            desktopWasUnavailable ||
+            windowInstance.bounds.width === 0 ||
+            windowInstance.bounds.height === 0;
+          const bounds =
+            mustRecover && definition
+              ? fitInitialBounds(
+                  definition,
+                  size,
+                  state.windowCascadeIndexes[windowInstance.id] ?? 0,
+                )
+              : clampBounds(windowInstance.bounds, size);
           return { ...windowInstance, bounds, restoreBounds: bounds };
         }),
       };
@@ -250,4 +287,10 @@ function normalizeDesktopSize(size: DesktopSize): DesktopSize {
     width: Math.max(0, size.width),
     height: Math.max(0, size.height),
   };
+}
+
+function withoutKey<T>(record: Record<string, T>, key: string): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(record).filter(([recordKey]) => recordKey !== key),
+  );
 }

@@ -75,4 +75,21 @@ describe("fitInitialBounds", () => {
       ),
     ).toEqual({ x: 150, y: 12, width: 900, height: 376 });
   });
+
+  it("keeps ultra-small initial bounds entirely inside the desktop", () => {
+    expect(
+      fitInitialBounds(
+        projectWindowDefinition,
+        { width: 10, height: 18 },
+        0,
+      ),
+    ).toEqual({ x: 0, y: 0, width: 10, height: 18 });
+    expect(
+      fitInitialBounds(
+        projectWindowDefinition,
+        { width: 0, height: 0 },
+        0,
+      ),
+    ).toEqual({ x: 0, y: 0, width: 0, height: 0 });
+  });
 });

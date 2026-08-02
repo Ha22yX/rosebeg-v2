@@ -222,6 +222,7 @@ export function WindowFrame({
               onPointerDown={(event) => startPointerOperation(event, direction)}
               onPointerMove={continuePointerOperation}
               onPointerUp={finishPointerOperation}
+              style={resizeHandleBoundaryStyle(direction)}
             />
           ))
         : null}
@@ -282,4 +283,13 @@ function releaseOperation(operation: PointerOperation | null): void {
   } catch {
     // Browsers throw when capture was already lost; cleanup is still complete.
   }
+}
+
+function resizeHandleBoundaryStyle(direction: ResizeDirection): CSSProperties {
+  return {
+    ...(direction.includes("north") ? { top: 0 } : {}),
+    ...(direction.includes("south") ? { bottom: 0 } : {}),
+    ...(direction.includes("east") ? { right: 0 } : {}),
+    ...(direction.includes("west") ? { left: 0 } : {}),
+  };
 }

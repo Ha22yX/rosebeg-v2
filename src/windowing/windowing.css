@@ -113,11 +113,11 @@
 }
 
 .xp-window__resize--north {
-  top: -1px;
+  top: 0;
 }
 
 .xp-window__resize--south {
-  bottom: -1px;
+  bottom: 0;
 }
 
 .xp-window__resize--east,
@@ -129,11 +129,11 @@
 }
 
 .xp-window__resize--east {
-  right: -1px;
+  right: 0;
 }
 
 .xp-window__resize--west {
-  left: -1px;
+  left: 0;
 }
 
 .xp-window__resize--northeast,
@@ -155,21 +155,21 @@
 }
 
 .xp-window__resize--northeast {
-  top: -1px;
-  right: -1px;
+  top: 0;
+  right: 0;
 }
 
 .xp-window__resize--southeast {
-  right: -1px;
-  bottom: -1px;
+  right: 0;
+  bottom: 0;
 }
 
 .xp-window__resize--southwest {
-  bottom: -1px;
-  left: -1px;
+  bottom: 0;
+  left: 0;
 }
 
 .xp-window__resize--northwest {
-  top: -1px;
-  left: -1px;
+  top: 0;
+  left: 0;
 }

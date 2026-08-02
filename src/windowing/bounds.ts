@@ -12,8 +12,12 @@ export function fitInitialBounds(
   desktopSize: DesktopSize,
   cascadeIndex: number,
 ): Rect {
-  const usableWidth = Math.max(0, desktopSize.width - INITIAL_MARGIN * 2);
-  const usableHeight = Math.max(0, desktopSize.height - INITIAL_MARGIN * 2);
+  const desktopWidth = Math.max(0, desktopSize.width);
+  const desktopHeight = Math.max(0, desktopSize.height);
+  const horizontalMargin = desktopWidth > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const verticalMargin = desktopHeight > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const usableWidth = desktopWidth - horizontalMargin * 2;
+  const usableHeight = desktopHeight - verticalMargin * 2;
   const narrowLayout = usableWidth < definition.minimumSize.width;
   const width = narrowLayout
     ? usableWidth
@@ -22,20 +26,20 @@ export function fitInitialBounds(
     ? usableHeight
     : Math.min(definition.idealSize.height, usableHeight);
   const centeredX = Math.max(
-    INITIAL_MARGIN,
-    Math.floor((desktopSize.width - width) / 2),
+    horizontalMargin,
+    Math.floor((desktopWidth - width) / 2),
   );
   const centeredY = Math.max(
-    INITIAL_MARGIN,
-    Math.floor((desktopSize.height - height) / 2),
+    verticalMargin,
+    Math.floor((desktopHeight - height) / 2),
   );
   const lastX = Math.max(
-    INITIAL_MARGIN,
-    desktopSize.width - INITIAL_MARGIN - width,
+    horizontalMargin,
+    desktopWidth - horizontalMargin - width,
   );
   const lastY = Math.max(
-    INITIAL_MARGIN,
-    desktopSize.height - INITIAL_MARGIN - height,
+    verticalMargin,
+    desktopHeight - verticalMargin - height,
   );
   const cascadeSteps =
     Math.floor(

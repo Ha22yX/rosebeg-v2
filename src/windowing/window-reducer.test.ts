@@ -163,6 +163,36 @@ describe("windowReducer", () => {
       relaunched.windows[0].bounds,
     );
   });
+
+  it("refits a normal window when a zero-size desktop later becomes available", () => {
+    const unavailable = windowReducer(initialWindowState, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 0, height: 0 },
+    });
+    const launched = windowReducer(unavailable, {
+      type: "LAUNCH",
+      id: "w1",
+      definition: projectWindowDefinition,
+      payload: {},
+    });
+    expect(launched.windows[0].bounds).toEqual({
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    });
+
+    const recovered = windowReducer(launched, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 1000, height: 700 },
+    });
+
+    expect(recovered.windows[0]).toMatchObject({
+      mode: "normal",
+      bounds: { x: 50, y: 40, width: 900, height: 620 },
+      restoreBounds: { x: 50, y: 40, width: 900, height: 620 },
+    });
+  });
 });
 
 function launchTwoWindows() {
