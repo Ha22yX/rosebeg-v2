@@ -1,0 +1,124 @@
+<h1 align="center">Rosebeg XP</h1>
+
+<p align="center">
+  A self-contained Windows XP desktop portfolio for exploring HarryX's software, electronics, photography, and profile.
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> &middot;
+  <a href="#controls">Controls</a> &middot;
+  <a href="#development">Development</a> &middot;
+  <a href="#status">Status</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/desktop.png" alt="Rosebeg XP desktop with four portfolio shortcuts" />
+</p>
+
+Rosebeg XP turns a personal portfolio into a working browser desktop instead of a conventional scrolling page. Sign in as Harry, open independent windows, browse project folders and photographs, read the About document, or talk to the local Messenger adapter.
+
+## Features
+
+- **Complete XP-style session:** boot, login, Start menu, taskbar, log off, restart, shutdown, and power-on flows.
+- **Real window behavior:** focus stacking, independent instances, dragging, resizing, minimizing, maximizing, restoring, and closing.
+- **Project Explorer:** nine software, robotics, creative-tool, and electronics projects with local folder views and source or demo shortcuts where configured.
+- **Photo workflow:** a 15-image Explorer gallery plus independent Picture and Fax Viewer windows with fit, actual size, zoom, rotation, and previous/next controls.
+- **About Notepad:** Markdown-rendered, read-only profile content with working selection, copy, and Word Wrap controls.
+- **Harry Messenger:** a typed `ChatService` boundary backed by deterministic local replies for projects, photography, contact details, and AI connection status.
+- **Responsive and accessible:** desktop, standard, and mobile layouts; semantic controls; keyboard navigation; reduced-motion support; and isolated application error states.
+
+## Gallery
+
+<table>
+  <tr>
+    <td colspan="2" align="center">
+      <img src="docs/screenshots/projects.png" alt="Maximized My Projects Explorer with nine project folders" />
+      <br />
+      <strong>My Projects.</strong> Nine portfolio entries presented as an XP Explorer directory.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/photos.png" alt="My Pictures Explorer showing the complete photo catalog" /></td>
+    <td width="50%"><img src="docs/screenshots/messenger.png" alt="Harry Messenger in a desktop with several portfolio windows" /></td>
+  </tr>
+  <tr>
+    <td><strong>My Pictures.</strong> All 15 photographs remain visible in one browser.</td>
+    <td><strong>Harry Messenger.</strong> Local portfolio replies sit behind an adapter ready for a future service.</td>
+  </tr>
+</table>
+
+## Controls
+
+| Input | How to use the desktop |
+| --- | --- |
+| Pointer | Double-click a desktop icon to open it. Drag title bars, resize from window edges or corners, and use the title-bar or taskbar controls. |
+| Touch | Tap a desktop icon once. Tap the regular controls; title bars and resize regions use pointer events for touch dragging. |
+| Keyboard | Use `Tab` / `Shift+Tab` to move focus and `Enter` to activate controls or desktop icons. `Escape` dismisses Start, power dialogs, and Notepad menus. In the photo viewer, use `ArrowLeft` / `ArrowRight`; in Messenger, use `Enter` to send and `Shift+Enter` for a new line. |
+
+## Technology
+
+| Layer | Technology | Role |
+| --- | --- | --- |
+| Interface | React 19 | Desktop shell, applications, system phases, and window composition |
+| Language and build | TypeScript 7 + Vite 7 | Static checking, development server, and production bundle |
+| Content | React Markdown + typed local records | About document, projects, photos, contacts, and chat copy |
+| Styling | Repository-local CSS and assets | XP visual system without runtime image hotlinks |
+| Verification | Vitest, Testing Library, jsdom, and Playwright | Unit, component, functional browser, and visual regression coverage |
+
+There is no backend in this repository. Messenger currently uses `LocalChatService`; it sends no request to an AI provider, includes no model credentials, and stores at most the current browser session's conversation history. The `ChatService` interface is the replacement seam for a future API adapter.
+
+## Content provenance
+
+Personal copy and the 15-photo catalog were migrated from Harry's V1 portfolio source into this repository. Rosebeg XP serves its own content and assets and has no runtime dependency on V1 or its host.
+
+[harry.rosebeg.com](https://harry.rosebeg.com/) is the **V1 legacy site**. It is not a deployment of Rosebeg XP.
+
+## Development
+
+Prerequisites: Node.js `^20.19.0` or `>=22.12.0` and npm. Browser tests also require Playwright's Chromium build.
+
+```powershell
+npm ci
+npm exec -- playwright install chromium
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`. The development server binds only to the local loopback interface.
+
+### Test matrix
+
+| Check | Command |
+| --- | --- |
+| Unit and component tests | `npm test` |
+| Type check | `npm run check` |
+| Production build | `npm run build` |
+| Functional end-to-end tests | `npm run test:e2e` |
+| Visual regression tests | `npm run test:visual` |
+
+The committed visual baselines target Chromium on Windows at desktop, standard, and mobile viewport sizes. In PowerShell environments where the `npm.ps1` shim is disabled, use `npm.cmd` in place of `npm`.
+
+## Repository structure
+
+```text
+src/
+  system/       Boot, login, shutdown, and restart state
+  desktop/      Desktop icons, Start menu, taskbar, and app registry
+  windowing/    Window state, bounds, frames, and pointer interactions
+  apps/         Projects, photos, About Notepad, and Messenger
+  content/      Typed portfolio data, Markdown, contacts, and chat copy
+  shared/       XP controls, dialogs, themes, and error boundaries
+public/assets/  Local icons, photography, and wallpaper
+tests/e2e/      Functional flows and committed visual baselines
+docs/screenshots/  README screenshots copied from verified baselines
+```
+
+## Status
+
+Rosebeg XP V2 is currently a source repository and is **not deployed**. The public URL above remains the V1 legacy portfolio. Messenger is intentionally local-only until a separate backend and credential strategy are designed.
+
+## Contact
+
+- [GitHub — @Ha22yX](https://github.com/Ha22yX)
+- [Instagram — @ha22yx](https://www.instagram.com/ha22yx/)
+- [Email — ha22y.xing@gmail.com](mailto:ha22y.xing@gmail.com)
+- WeChat — `imxzy945`

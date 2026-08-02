@@ -6,5 +6,7 @@ playwright-report/
 test-results/
 .env
 .env.*
+.DS_Store
+*.tsbuildinfo
 debug-*.png
 *.debug.png
