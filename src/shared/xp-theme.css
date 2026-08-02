@@ -1,0 +1,100 @@
+:root {
+  color-scheme: light;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  --xp-blue-dark: #003c74;
+  --xp-blue: #0058ee;
+  --xp-blue-light: #3a93ff;
+  --xp-surface: #ece9d8;
+  --xp-border-light: #ffffff;
+  --xp-border-mid: #aca899;
+  --xp-border-dark: #003c74;
+  --xp-text: #101010;
+  --xp-focus: #000080;
+}
+
+.xp-button {
+  min-height: 23px;
+  padding: 2px 10px 3px;
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  color: var(--xp-text);
+  background: linear-gradient(#ffffff 0 10%, #f0f0ea 45%, #dfdfd3 100%);
+  box-shadow:
+    inset 1px 1px 0 var(--xp-border-light),
+    inset -1px -1px 0 var(--xp-border-mid);
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+  cursor: default;
+}
+
+.xp-button:hover:not(:disabled) {
+  border-color: #e68b2c;
+}
+
+.xp-button:active:not(:disabled) {
+  padding: 3px 9px 2px 11px;
+  background: #dad7c7;
+  box-shadow: inset 1px 1px 1px #888477;
+}
+
+.xp-button:focus-visible {
+  outline: 1px dotted var(--xp-focus);
+  outline-offset: -4px;
+}
+
+.xp-button:disabled {
+  color: #8d8d84;
+}
+
+.xp-dialog {
+  min-width: 280px;
+  overflow: hidden;
+  border: 3px solid var(--xp-blue);
+  border-radius: 7px 7px 2px 2px;
+  color: var(--xp-text);
+  background: var(--xp-surface);
+  box-shadow: 4px 5px 14px rgb(0 0 0 / 32%);
+}
+
+.xp-dialog__title-bar {
+  display: flex;
+  min-height: 25px;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 3px 2px 7px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--xp-blue-dark), var(--xp-blue-light));
+}
+
+.xp-dialog__title-bar h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px #0c2b66;
+  white-space: nowrap;
+}
+
+.xp-dialog__close {
+  min-width: 21px;
+  min-height: 21px;
+  margin-left: auto;
+  padding: 0;
+  border-color: #fff;
+  color: #fff;
+  background: linear-gradient(135deg, #f39d7c, #d54222 55%, #a71900);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 17px;
+}
+
+.xp-dialog__body {
+  padding: 14px;
+}
+
+.xp-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 14px 12px;
+}

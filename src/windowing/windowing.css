@@ -1,0 +1,175 @@
+.window-manager__layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.xp-window {
+  position: absolute;
+  display: flex;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 3px solid #7a96df;
+  border-radius: 7px 7px 2px 2px;
+  color: var(--xp-text);
+  background: var(--xp-surface);
+  box-shadow: 3px 4px 12px rgb(0 0 0 / 30%);
+  pointer-events: auto;
+}
+
+.xp-window.is-active {
+  border-color: var(--xp-blue);
+}
+
+.xp-window__title-bar {
+  display: flex;
+  min-height: 25px;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 2px 1px 4px;
+  color: #e7e7e7;
+  background: linear-gradient(90deg, #7697dc, #9db9eb);
+  touch-action: none;
+  user-select: none;
+}
+
+.xp-window.is-active .xp-window__title-bar {
+  color: #fff;
+  background: linear-gradient(90deg, #0058ee, #3a93ff 70%, #0054e3);
+}
+
+.xp-window__icon {
+  flex: 0 0 auto;
+  image-rendering: auto;
+}
+
+.xp-window__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  flex: 1;
+  font: 700 12px/18px Tahoma, "Segoe UI", sans-serif;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px #0c2b66;
+  white-space: nowrap;
+}
+
+.xp-window__controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
+.xp-window__control {
+  display: grid;
+  width: 21px;
+  min-width: 21px;
+  height: 21px;
+  min-height: 21px;
+  padding: 0;
+  place-items: center;
+  border-color: #fff;
+  color: #fff;
+  background: linear-gradient(135deg, #7eb6ff, #2865d6 55%, #164eb5);
+  box-shadow: inset 1px 1px 1px rgb(255 255 255 / 70%);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.xp-window__control:active:not(:disabled) {
+  padding: 1px 0 0 1px;
+}
+
+.xp-window__control--close {
+  background: linear-gradient(135deg, #f4aa8e, #dc4827 55%, #a71900);
+  font-size: 19px;
+}
+
+.xp-window__body {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1;
+  background: #fff;
+}
+
+.xp-window__resize {
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+}
+
+.xp-window__resize--north,
+.xp-window__resize--south {
+  right: 7px;
+  left: 7px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.xp-window__resize--north {
+  top: -1px;
+}
+
+.xp-window__resize--south {
+  bottom: -1px;
+}
+
+.xp-window__resize--east,
+.xp-window__resize--west {
+  top: 7px;
+  bottom: 7px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.xp-window__resize--east {
+  right: -1px;
+}
+
+.xp-window__resize--west {
+  left: -1px;
+}
+
+.xp-window__resize--northeast,
+.xp-window__resize--southeast,
+.xp-window__resize--southwest,
+.xp-window__resize--northwest {
+  width: 10px;
+  height: 10px;
+}
+
+.xp-window__resize--northeast,
+.xp-window__resize--southwest {
+  cursor: nesw-resize;
+}
+
+.xp-window__resize--southeast,
+.xp-window__resize--northwest {
+  cursor: nwse-resize;
+}
+
+.xp-window__resize--northeast {
+  top: -1px;
+  right: -1px;
+}
+
+.xp-window__resize--southeast {
+  right: -1px;
+  bottom: -1px;
+}
+
+.xp-window__resize--southwest {
+  bottom: -1px;
+  left: -1px;
+}
+
+.xp-window__resize--northwest {
+  top: -1px;
+  left: -1px;
+}
