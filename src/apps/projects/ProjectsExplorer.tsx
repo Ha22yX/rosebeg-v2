@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useMemo,
   useReducer,
   useState,
@@ -29,6 +30,12 @@ const viewLabels: ReadonlyArray<{ value: ExplorerView; label: string }> = [
 export function ProjectsExplorer({
   initialProjectSlug,
 }: ProjectsExplorerProps) {
+  const explorerId = useId();
+  const searchId = `${explorerId}-project-search`;
+  const addressId = `${explorerId}-project-address`;
+  const overviewId = `${explorerId}-project-overview`;
+  const technologyId = `${explorerId}-project-technology`;
+  const filesId = `${explorerId}-project-files`;
   const initialProject = projects.find(
     (project) => project.slug === initialProjectSlug,
   );
@@ -65,7 +72,7 @@ export function ProjectsExplorer({
             [
               project.name,
               project.kicker,
-              project.category,
+              formatCategory(project.category),
               ...project.stack,
             ].some((value) =>
               value.toLocaleLowerCase().includes(normalizedQuery),
@@ -122,10 +129,10 @@ export function ProjectsExplorer({
 
       {searchVisible && state.current.kind === "root" ? (
         <div className="projects-explorer__search">
-          <label htmlFor="project-search">Search projects</label>
+          <label htmlFor={searchId}>Search projects</label>
           <input
             autoFocus
-            id="project-search"
+            id={searchId}
             onChange={(event) =>
               dispatch({ type: "SET_QUERY", query: event.currentTarget.value })
             }
@@ -137,11 +144,11 @@ export function ProjectsExplorer({
       ) : null}
 
       <div className="projects-explorer__address-row">
-        <label htmlFor="project-address">Address</label>
+        <label htmlFor={addressId}>Address</label>
         <span aria-hidden="true" className="projects-explorer__address-icon">
           📁
         </span>
-        <input id="project-address" readOnly value={address} />
+        <input id={addressId} readOnly value={address} />
         <span aria-hidden="true" className="projects-explorer__go">
           ➜
         </span>
@@ -158,7 +165,12 @@ export function ProjectsExplorer({
 
         <main className="projects-explorer__content">
           {activeProject ? (
-            <ProjectDetail project={activeProject} />
+            <ProjectDetail
+              filesId={filesId}
+              overviewId={overviewId}
+              project={activeProject}
+              technologyId={technologyId}
+            />
           ) : (
             <ProjectRoot
               onOpenProject={openProject}
@@ -437,7 +449,19 @@ function ProjectFolderButton({
   );
 }
 
-function ProjectDetail({ project }: { project: Project }) {
+type ProjectDetailProps = {
+  project: Project;
+  overviewId: string;
+  technologyId: string;
+  filesId: string;
+};
+
+function ProjectDetail({
+  project,
+  overviewId,
+  technologyId,
+  filesId,
+}: ProjectDetailProps) {
   return (
     <article className="projects-explorer__project-detail">
       <header className="projects-explorer__project-header">
@@ -449,14 +473,14 @@ function ProjectDetail({ project }: { project: Project }) {
         </div>
       </header>
 
-      <section className="projects-explorer__story" aria-labelledby="project-overview">
-        <h2 id="project-overview">Project overview</h2>
+      <section className="projects-explorer__story" aria-labelledby={overviewId}>
+        <h2 id={overviewId}>Project overview</h2>
         <p className="projects-explorer__tagline">{project.tagline}</p>
         <p>{project.story}</p>
       </section>
 
-      <section aria-labelledby="project-technology" className="projects-explorer__stack">
-        <h2 id="project-technology">Technology</h2>
+      <section aria-labelledby={technologyId} className="projects-explorer__stack">
+        <h2 id={technologyId}>Technology</h2>
         <ul>
           {project.stack.map((item) => (
             <li key={item}>{item}</li>
@@ -464,10 +488,10 @@ function ProjectDetail({ project }: { project: Project }) {
         </ul>
       </section>
 
-      <section aria-labelledby="project-files" className="projects-explorer__snapshot">
+      <section aria-labelledby={filesId} className="projects-explorer__snapshot">
         <div className="projects-explorer__section-heading">
           <div>
-            <h2 id="project-files">Repository snapshot</h2>
+            <h2 id={filesId}>Repository snapshot</h2>
             <p>{project.files.length} items in this folder</p>
           </div>
           <div className="projects-explorer__shortcuts">

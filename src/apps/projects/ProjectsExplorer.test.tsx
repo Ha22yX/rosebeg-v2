@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { projects } from "@/content/projects";
 import { ProjectsExplorer } from "@/apps/projects/ProjectsExplorer";
@@ -68,6 +68,81 @@ describe("ProjectsExplorer", () => {
       screen.getByRole("button", { name: "ESP32 Sound Radar folder" }),
     ).toBeInTheDocument();
     expect(screen.getByText("3 objects")).toBeInTheDocument();
+  });
+
+  it("filters by the category label shown in project details", async () => {
+    const user = userEvent.setup();
+    render(<ProjectsExplorer />);
+
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    await user.type(
+      screen.getByRole("searchbox", { name: "Search projects" }),
+      "Creative tool",
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "Surfboard Vacuum Table DXF Generator folder",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "PhotoBack folder" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("2 objects")).toBeInTheDocument();
+  });
+
+  it("keeps form labels and detail headings scoped to each Explorer instance", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <ProjectsExplorer />
+        <ProjectsExplorer />
+      </>,
+    );
+    const explorers = screen.getAllByRole("region", {
+      name: "My Projects Explorer",
+    });
+    const associationIds: string[] = [];
+
+    for (const explorer of explorers) {
+      const address = within(explorer).getByRole("textbox", { name: "Address" });
+      const addressLabel = within(explorer).getByText("Address");
+      expect(addressLabel).toHaveAttribute("for", address.id);
+      expect(explorer).toContainElement(document.getElementById(address.id));
+      associationIds.push(address.id);
+
+      await user.click(within(explorer).getByRole("button", { name: "Search" }));
+      const search = within(explorer).getByRole("searchbox", {
+        name: "Search projects",
+      });
+      const searchLabel = within(explorer).getByText("Search projects");
+      expect(searchLabel).toHaveAttribute("for", search.id);
+      expect(explorer).toContainElement(document.getElementById(search.id));
+      associationIds.push(search.id);
+    }
+
+    await user.dblClick(
+      within(explorers[0]).getByRole("button", { name: "PhotoBack folder" }),
+    );
+    await user.dblClick(
+      within(explorers[1]).getByRole("button", { name: "DayVault folder" }),
+    );
+
+    for (const explorer of explorers) {
+      for (const name of [
+        "Project overview",
+        "Technology",
+        "Repository snapshot",
+      ]) {
+        const section = within(explorer).getByRole("region", { name });
+        const headingId = section.getAttribute("aria-labelledby");
+        expect(headingId).toBeTruthy();
+        expect(explorer).toContainElement(document.getElementById(headingId!));
+        associationIds.push(headingId!);
+      }
+    }
+
+    expect(new Set(associationIds).size).toBe(associationIds.length);
   });
 
   it("keeps the same folders available in Large Icons, List, and Details views", async () => {
