@@ -10,14 +10,23 @@ const viewports = [
 for (const viewport of viewports) {
   test(`${viewport.name} visual states`, async ({ page }) => {
     await page.setViewportSize(viewport);
-    await page.clock.setFixedTime(new Date("2026-08-02T04:34:00.000Z"));
-    await page.goto("/");
+    await page.clock.install({
+      time: new Date("2026-08-02T04:34:00.000Z"),
+    });
+    await page.clock.pauseAt(new Date("2026-08-02T04:34:00.000Z"));
     await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    await expect(page.getByTestId("boot-screen")).toBeVisible();
+    await capture(page, `${viewport.name}-boot.png`);
+
+    await page.clock.fastForward(150);
 
     await expect(page.getByTestId("login-screen")).toBeVisible({
       timeout: 3_000,
     });
     await capture(page, `${viewport.name}-login.png`);
+    await page.clock.resume();
 
     await loginToDesktop(page);
     await capture(page, `${viewport.name}-desktop.png`);

@@ -9,7 +9,9 @@
   display: grid;
   place-content: center;
   gap: 14px;
+  min-height: 100dvh;
   padding: 24px;
+  overflow: hidden;
   text-align: center;
   font-family: Tahoma, Arial, sans-serif;
 }
@@ -20,40 +22,236 @@
   color: #fff;
 }
 
-.xp-logo {
+.boot-screen {
+  align-content: center;
+  justify-items: center;
+  gap: clamp(42px, 7vh, 76px);
+  padding: clamp(20px, 5vw, 64px);
+}
+
+.rosebeg-xp-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  color: #1b1b1b;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: clamp(2.35rem, 5vw, 3.35rem);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+.rosebeg-xp-logo--inverse {
   color: #fff;
-  font-size: 2rem;
-  font-weight: 700;
+}
+
+.rosebeg-xp-logo__symbol {
+  width: 0.92em;
+  height: 0.92em;
+  flex: 0 0 auto;
+  filter: saturate(1.08);
+}
+
+.rosebeg-xp-logo__wordmark {
+  margin-left: 0.01em;
+}
+
+.rosebeg-xp-logo__xp {
+  align-self: flex-end;
+  margin: 0 0 0.08em -0.04em;
+  font-size: 0.42em;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.rosebeg-xp-logo--compact {
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.boot-screen > .rosebeg-xp-logo {
+  transform: translateY(clamp(-34px, -4vh, -18px));
+}
+
+.boot-progress {
+  position: relative;
+  display: block;
+  width: clamp(132px, 13vw, 164px);
+  height: 18px;
+  margin-top: clamp(-28px, -3vh, -14px);
+  overflow: hidden;
+  border: 1px solid #8d8d8d;
+  border-radius: 3px;
+  background: #050505;
+  box-shadow:
+    inset 1px 1px 0 #353535,
+    inset -1px -1px 0 #242424,
+    0 0 0 1px #161616;
+  clip-path: inset(0 round 3px);
+}
+
+.boot-progress__block {
+  position: absolute;
+  top: 3px;
+  left: -17px;
+  width: 12px;
+  height: 10px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #194cba 0%, #4d8ff1 48%, #1b50be 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%);
+  animation: rosebeg-boot-progress 1.15s linear infinite;
+}
+
+.boot-progress__block:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.boot-progress__block:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes rosebeg-boot-progress {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(181px);
+  }
 }
 
 .login-screen {
-  background: #5a7ed1;
+  --xp-login-dark: #003399;
+  --xp-login-mid: #5a7ed1;
+  --xp-login-light: #6f91df;
+  --xp-login-rule: #f4a32c;
+  --xp-login-select: #1f5fbd;
+
+  display: grid;
+  grid-template-rows:
+    clamp(68px, 10.5vh, 108px)
+    minmax(0, 1fr)
+    clamp(92px, 14vh, 132px);
+  min-height: 100dvh;
+  height: 100dvh;
+  padding: 0;
   color: #fff;
+  background: var(--xp-login-mid);
+  text-align: left;
+}
+
+.login-header,
+.login-footer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--xp-login-dark);
+}
+
+.login-header {
+  justify-content: flex-start;
+  padding-inline: max(24px, calc((100vw - 1080px) / 2));
+  border-bottom: 3px solid var(--xp-login-rule);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 28%);
+}
+
+.login-main {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  width: 100%;
+  padding: clamp(22px, 5vh, 54px) clamp(22px, 5vw, 74px);
+  background: var(--xp-login-light);
 }
 
 .login-panel {
+  position: relative;
   display: grid;
-  justify-items: center;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 12px clamp(54px, 7vw, 88px);
+  width: min(100%, 980px);
+  min-width: 0;
+}
+
+.login-panel::before {
+  position: absolute;
+  top: clamp(-28px, -3vh, -18px);
+  bottom: clamp(-28px, -3vh, -18px);
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(255 255 255 / 68%) 18%,
+    rgb(255 255 255 / 68%) 82%,
+    transparent
+  );
+  box-shadow: 1px 0 0 rgb(33 70 151 / 45%);
+  content: "";
 }
 
 .login-heading {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: stretch;
   margin: 0;
-  font-size: 2rem;
+  text-align: right;
+  font-size: clamp(1.8rem, 3.2vw, 2.55rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  text-shadow: 1px 2px 1px rgb(20 53 130 / 55%);
+}
+
+.login-panel > p:not(.login-heading) {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: stretch;
+  max-width: 360px;
+  margin: 0 0 0 auto;
+  text-align: right;
+  font-size: clamp(0.86rem, 1.45vw, 1.05rem);
+  line-height: 1.45;
+  text-shadow: 1px 1px 1px rgb(20 53 130 / 55%);
 }
 
 .account-button {
-  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-columns: clamp(48px, 5vw, 62px) minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  border: 2px solid #fff;
-  border-radius: 4px;
-  background: #1d4ea8;
+  justify-self: start;
+  gap: 12px;
+  width: min(100%, 350px);
+  min-width: 0;
+  min-height: clamp(60px, 8vw, 74px);
+  padding: 5px 14px 5px 6px;
+  overflow: hidden;
+  border: 2px solid rgb(255 255 255 / 86%);
+  border-radius: 8px;
+  background: var(--xp-login-select);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 40 125 / 72%),
+    0 1px 1px rgb(0 35 112 / 38%);
   color: inherit;
   cursor: pointer;
+  text-align: left;
   font: inherit;
+  font-size: clamp(1.05rem, 2vw, 1.32rem);
   font-weight: 700;
-  padding: 8px 14px;
+  text-shadow: 1px 1px 1px #123d91;
+}
+
+.account-button:hover {
+  background: #2b6dca;
+}
+
+.account-button:active {
+  transform: translateY(1px);
 }
 
 .account-button:focus-visible,
@@ -62,20 +260,63 @@
   outline-offset: 3px;
 }
 
+.account-button:disabled {
+  cursor: wait;
+  opacity: 1;
+}
+
 .account-avatar {
   display: inline-grid;
-  width: 38px;
-  height: 38px;
+  width: clamp(48px, 5vw, 62px);
+  height: clamp(48px, 5vw, 62px);
   place-items: center;
   border: 2px solid #fff;
-  border-radius: 4px;
-  background: #e57a27;
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 50% 34%, #ffd5a1 0 13%, transparent 14%),
+    radial-gradient(ellipse at 50% 105%, #1b3a79 0 35%, transparent 36%),
+    linear-gradient(145deg, #f7a027, #c85d19);
+  box-shadow: inset 0 0 0 1px rgb(112 49 10 / 60%);
   color: #fff;
+  font-size: 0.82em;
   font-weight: 700;
+  text-shadow: 1px 1px 1px rgb(96 38 0 / 65%);
 }
 
 .system-status {
   margin: 0;
+}
+
+.login-footer {
+  position: relative;
+  justify-content: flex-start;
+  gap: 14px;
+  padding-inline: max(24px, calc((100vw - 1080px) / 2));
+  border-top: 3px solid var(--xp-login-rule);
+  box-shadow: 0 -1px 0 rgb(255 255 255 / 24%);
+  font-size: clamp(0.72rem, 1.3vw, 0.9rem);
+  line-height: 1.45;
+  text-shadow: 1px 1px 1px #001e69;
+}
+
+.login-footer::before {
+  display: grid;
+  width: clamp(34px, 4vw, 42px);
+  height: clamp(34px, 4vw, 42px);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 7px;
+  background: #d94e36;
+  box-shadow:
+    inset 0 0 0 1px #8a2116,
+    0 1px 1px rgb(0 22 80 / 70%);
+  content: "\23FB";
+  color: #fff;
+  font-family: "Segoe UI Symbol", sans-serif;
+  font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+  line-height: 1;
+  text-shadow: 1px 1px 0 #8a2116;
 }
 
 .power-screen button {
@@ -87,4 +328,152 @@
   cursor: pointer;
   font: inherit;
   padding: 7px 18px;
+}
+
+@media (max-width: 679px) {
+  .login-screen {
+    grid-template-rows: clamp(58px, 11vh, 74px) minmax(0, 1fr) clamp(82px, 16vh, 108px);
+  }
+
+  .login-header {
+    justify-content: center;
+    padding-inline: 16px;
+  }
+
+  .login-main {
+    align-items: center;
+    padding: clamp(18px, 4vh, 30px) clamp(16px, 7vw, 28px);
+  }
+
+  .login-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 7px;
+    width: min(100%, 360px);
+  }
+
+  .login-panel::before {
+    top: auto;
+    right: 8%;
+    bottom: clamp(74px, 14vh, 94px);
+    left: 8%;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 68%) 18%,
+      rgb(255 255 255 / 68%) 82%,
+      transparent
+    );
+    box-shadow: 0 1px 0 rgb(33 70 151 / 45%);
+  }
+
+  .login-heading,
+  .login-panel > p:not(.login-heading) {
+    grid-column: 1;
+    justify-self: center;
+    max-width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .login-heading {
+    grid-row: 1;
+    font-size: clamp(1.7rem, 9vw, 2.15rem);
+  }
+
+  .login-panel > p:not(.login-heading) {
+    grid-row: 2;
+    max-width: 260px;
+    font-size: clamp(0.78rem, 4vw, 0.95rem);
+  }
+
+  .account-button {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: center;
+    width: min(100%, 290px);
+    margin-top: clamp(25px, 6vh, 38px);
+  }
+
+  .login-footer {
+    justify-content: center;
+    padding: 12px clamp(14px, 6vw, 24px);
+    font-size: clamp(0.65rem, 3.1vw, 0.78rem);
+  }
+
+  .login-footer::before {
+    width: 32px;
+    height: 32px;
+    font-size: 1.12rem;
+  }
+}
+
+@media (max-height: 620px) {
+  .boot-screen {
+    gap: 34px;
+  }
+
+  .login-screen {
+    grid-template-rows: 58px minmax(0, 1fr) 82px;
+  }
+
+  .login-main {
+    padding-block: 16px;
+  }
+
+  .account-button {
+    min-height: 56px;
+  }
+
+  .account-button,
+  .account-avatar {
+    --short-account-size: 48px;
+  }
+
+  .account-avatar {
+    width: var(--short-account-size);
+    height: var(--short-account-size);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding-inline: 4px;
+  }
+
+  .boot-progress__block {
+    position: static;
+    width: 12px;
+    flex: 0 0 12px;
+    animation: rosebeg-boot-pulse 1.2s ease-in-out infinite;
+  }
+
+  .boot-progress__block:nth-child(2) {
+    animation-delay: 160ms;
+  }
+
+  .boot-progress__block:nth-child(3) {
+    animation-delay: 320ms;
+  }
+
+  .account-button:active {
+    transform: none;
+  }
+}
+
+@keyframes rosebeg-boot-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
