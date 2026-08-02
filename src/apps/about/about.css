@@ -131,6 +131,8 @@
 }
 
 .about-notepad__document.is-word-wrapped {
+  box-sizing: border-box;
+  width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
   white-space: normal;

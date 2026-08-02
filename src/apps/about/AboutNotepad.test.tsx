@@ -7,9 +7,16 @@ import {
 import { aboutMarkdown } from "@/content/about";
 
 describe("AboutNotepad", () => {
-  it("renders the approved Markdown document with semantic headings", () => {
+  it("renders the approved Markdown document with Word Wrap enabled", async () => {
+    const user = userEvent.setup();
     render(<AboutNotepad closeWindow={vi.fn()} />);
 
+    expect(screen.getByTestId("notepad-document")).toHaveClass("is-word-wrapped");
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    expect(screen.getByRole("menuitemcheckbox", { name: "Word Wrap" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
     expect(
       screen.getByRole("heading", { level: 1, name: "Zhiyuan Xing / HarryX" }),
     ).toBeInTheDocument();
@@ -39,7 +46,7 @@ describe("AboutNotepad", () => {
 
     await user.click(screen.getByRole("button", { name: "Format" }));
     await user.click(screen.getByRole("menuitemcheckbox", { name: "Word Wrap" }));
-    expect(screen.getByTestId("notepad-document")).toHaveClass("is-word-wrapped");
+    expect(screen.getByTestId("notepad-document")).not.toHaveClass("is-word-wrapped");
   });
 
   it("operates menus with a roving enabled-item keyboard model", async () => {
@@ -75,7 +82,7 @@ describe("AboutNotepad", () => {
     const wordWrap = screen.getByRole("menuitemcheckbox", { name: "Word Wrap" });
     expect(wordWrap).toHaveFocus();
     await user.keyboard("{Enter}");
-    expect(screen.getByTestId("notepad-document")).toHaveClass("is-word-wrapped");
+    expect(screen.getByTestId("notepad-document")).not.toHaveClass("is-word-wrapped");
     expect(format).toHaveFocus();
   });
 

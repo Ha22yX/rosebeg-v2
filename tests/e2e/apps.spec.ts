@@ -126,7 +126,7 @@ test("shows all photos, opens two viewers, and advances with ArrowRight", async 
   await expect(secondViewer.getByText("3 of 15", { exact: true })).toBeVisible();
 });
 
-test("toggles Notepad Word Wrap", async ({ page }) => {
+test("wraps Notepad content by default and allows Word Wrap to be toggled", async ({ page }) => {
   await page.goto("/");
   await loginToDesktop(page);
   await page
@@ -142,7 +142,30 @@ test("toggles Notepad Word Wrap", async ({ page }) => {
     name: "Word Wrap",
     exact: true,
   });
-  await expect(wordWrap).toHaveAttribute("aria-checked", "false");
+  await expect(wordWrap).toHaveAttribute("aria-checked", "true");
+
+  const resizeHandle = notepad.locator(".xp-window__resize--east");
+  const resizeHandleBox = await resizeHandle.boundingBox();
+  if (!resizeHandleBox) throw new Error("Notepad east resize handle is not visible");
+  await page.mouse.move(
+    resizeHandleBox.x + resizeHandleBox.width / 2,
+    resizeHandleBox.y + resizeHandleBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    resizeHandleBox.x + resizeHandleBox.width / 2 - 180,
+    resizeHandleBox.y + resizeHandleBox.height / 2,
+  );
+  await page.mouse.up();
+
+  const editorWidth = await notepad
+    .locator(".about-notepad__editor")
+    .evaluate((node) => node.clientWidth);
+  const documentWidth = await notepad
+    .getByTestId("notepad-document")
+    .evaluate((node) => node.scrollWidth);
+  expect(documentWidth).toBeLessThanOrEqual(editorWidth);
+
   await wordWrap.click();
   await notepad.getByRole("button", { name: "Format", exact: true }).click();
   await expect(
@@ -150,7 +173,7 @@ test("toggles Notepad Word Wrap", async ({ page }) => {
       name: "Word Wrap",
       exact: true,
     }),
-  ).toHaveAttribute("aria-checked", "true");
+  ).toHaveAttribute("aria-checked", "false");
 });
 
 test("sends a Messenger message and receives the local reply", async ({ page }) => {

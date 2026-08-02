@@ -30,7 +30,7 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
   const documentRef = useRef<HTMLElement>(null);
   const triggerRefs = useRef<Partial<Record<MenuName, HTMLButtonElement | null>>>({});
   const [openMenu, setOpenMenu] = useState<MenuName | null>(null);
-  const [wordWrap, setWordWrap] = useState(false);
+  const [wordWrap, setWordWrap] = useState(true);
   const [statusBarVisible, setStatusBarVisible] = useState(true);
   const [statusMessage, setStatusMessage] = useState("Ready");
   const [aboutVisible, setAboutVisible] = useState(false);
