@@ -64,6 +64,41 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("login-screen")).toBeInTheDocument();
   });
 
+  it("shows Rosebeg XP branding and a decorative boot progress indicator", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <div>Desktop child</div>
+      </SystemRoot>,
+    );
+
+    expect(screen.getByRole("img", { name: "Rosebeg XP" })).toBeInTheDocument();
+    expect(screen.getByTestId("boot-progress")).toBeInTheDocument();
+    expect(screen.queryByText("Starting Windows...")).not.toBeInTheDocument();
+  });
+
+  it("keeps the login shell and Harry account content while signing in", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <div>Desktop child</div>
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_800));
+    expect(screen.getByTestId("login-header")).toBeInTheDocument();
+    expect(screen.getByTestId("login-main")).toBeInTheDocument();
+    expect(screen.getByTestId("login-footer")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Harry" })).toBeInTheDocument();
+    expect(screen.getByText("To begin, click your user name")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    expect(screen.getByTestId("login-header")).toBeInTheDocument();
+    expect(screen.getByTestId("login-main")).toBeInTheDocument();
+    expect(screen.getByTestId("login-footer")).toBeInTheDocument();
+    expect(screen.getByText("Harry")).toBeInTheDocument();
+    expect(screen.getByText("Welcome")).toBeInTheDocument();
+    expect(screen.getByText("Loading your personal settings...")).toBeInTheDocument();
+  });
+
   it("keeps normal sign-in visible for exactly 650 ms", () => {
     render(
       <SystemRoot reducedMotion={false}>
