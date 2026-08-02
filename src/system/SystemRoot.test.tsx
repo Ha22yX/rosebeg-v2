@@ -1,5 +1,5 @@
 import { act } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SystemRoot, useSystemActions } from "@/system/SystemRoot";
 
@@ -76,7 +76,7 @@ describe("SystemRoot", () => {
     expect(screen.queryByText("Starting Windows...")).not.toBeInTheDocument();
   });
 
-  it("keeps the login shell and Harry account content while signing in", () => {
+  it("shows the Rosebeg XP intro and the two login footer groups", () => {
     render(
       <SystemRoot reducedMotion={false}>
         <div>Desktop child</div>
@@ -88,15 +88,38 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("login-main")).toBeInTheDocument();
     expect(screen.getByTestId("login-footer")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Harry" })).toBeInTheDocument();
-    expect(screen.getByText("To begin, click your user name")).toBeInTheDocument();
+    const header = screen.getByTestId("login-header");
+    const intro = screen.getByTestId("login-intro");
+    const footer = screen.getByTestId("login-footer");
+    expect(within(header).queryByRole("img", { name: "Rosebeg XP" })).not.toBeInTheDocument();
+    expect(within(intro).getByRole("img", { name: "Rosebeg XP" })).toBeInTheDocument();
+    expect(within(intro).getByText("To begin, click your user name")).toBeInTheDocument();
+    expect(within(intro).queryByText("Welcome")).not.toBeInTheDocument();
+    expect(within(footer).getByText("Turn off computer")).toBeInTheDocument();
+    expect(
+      within(footer).getByText(
+        "After you log on, you can explore Harry's work, photography, and story.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the login shell and Harry account content while signing in", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <div>Desktop child</div>
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_800));
 
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
     expect(screen.getByTestId("login-header")).toBeInTheDocument();
     expect(screen.getByTestId("login-main")).toBeInTheDocument();
     expect(screen.getByTestId("login-footer")).toBeInTheDocument();
     expect(screen.getByText("Harry")).toBeInTheDocument();
-    expect(screen.getByText("Welcome")).toBeInTheDocument();
-    expect(screen.getByText("Loading your personal settings...")).toBeInTheDocument();
+    const intro = screen.getByTestId("login-intro");
+    expect(within(intro).getByText("Welcome")).toBeInTheDocument();
+    expect(within(intro).getByText("Loading your personal settings...")).toBeInTheDocument();
   });
 
   it("keeps normal sign-in visible for exactly 650 ms", () => {
