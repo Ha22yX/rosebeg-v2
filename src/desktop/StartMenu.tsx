@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, type KeyboardEvent } from "react";
 import { XpIcon } from "@/shared/XpIcon";
 import type { AppId } from "@/windowing/types";
 
@@ -64,6 +64,8 @@ export function StartMenu({
   onLogOff,
   onTurnOff,
 }: StartMenuProps) {
+  const menuId = useId();
+  const placesDescriptionId = `${menuId}-places-description`;
   const menuRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -113,6 +115,8 @@ export function StartMenu({
         <div className="start-menu__primary">
           {primaryEntries.map((entry) => (
             <button
+              aria-describedby={`${menuId}-${entry.appId}-description`}
+              aria-label={entry.label}
               className="start-menu__item start-menu__item--primary"
               key={entry.appId}
               onClick={() => launch(entry.appId)}
@@ -122,14 +126,21 @@ export function StartMenu({
               <XpIcon alt="" size={36} src={entry.icon} />
               <span>
                 <strong>{entry.label}</strong>
-                <small>{entry.detail}</small>
+                <small id={`${menuId}-${entry.appId}-description`}>
+                  {entry.detail}
+                </small>
               </span>
             </button>
           ))}
         </div>
 
         <div className="start-menu__places">
+          <span hidden id={placesDescriptionId}>
+            Start menu places
+          </span>
           <a
+            aria-describedby={placesDescriptionId}
+            aria-label="GitHub"
             className="start-menu__item start-menu__item--place"
             href="https://github.com/Ha22yX"
             onClick={onDismiss}
@@ -143,6 +154,8 @@ export function StartMenu({
           <span aria-hidden="true" className="start-menu__divider" />
           {placeEntries.map((entry) => (
             <button
+              aria-describedby={placesDescriptionId}
+              aria-label={entry.label}
               className="start-menu__item start-menu__item--place"
               key={entry.appId}
               onClick={() => launch(entry.appId)}

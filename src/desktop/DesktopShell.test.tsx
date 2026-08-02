@@ -88,6 +88,24 @@ describe("DesktopShell", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps exact Start item names while exposing action context as descriptions", () => {
+    renderDesktop();
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    const menu = screen.getByRole("menu", { name: "Start menu" });
+    const projects = within(menu).getByRole("menuitem", {
+      name: "My Projects",
+    });
+    const pictures = within(menu).getAllByRole("menuitem", {
+      name: "My Pictures",
+    });
+
+    expect(projects).toHaveAccessibleName("My Projects");
+    expect(projects).toHaveAccessibleDescription("Explore selected work");
+    expect(pictures).toHaveLength(2);
+    expect(pictures[0]).toHaveAccessibleDescription("Browse the photo archive");
+    expect(pictures[1]).toHaveAccessibleDescription("Start menu places");
+  });
+
   it("launches a desktop app with one touch pointer activation", () => {
     renderDesktop();
 
