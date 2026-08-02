@@ -1,4 +1,6 @@
 import {
+  useEffect,
+  useId,
   useRef,
   useState,
   type ComponentPropsWithoutRef,
@@ -24,7 +26,9 @@ const menuLabels: Readonly<Record<MenuName, string>> = {
 };
 
 export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
+  const notepadId = useId();
   const documentRef = useRef<HTMLElement>(null);
+  const triggerRefs = useRef<Partial<Record<MenuName, HTMLButtonElement | null>>>({});
   const [openMenu, setOpenMenu] = useState<MenuName | null>(null);
   const [wordWrap, setWordWrap] = useState(false);
   const [statusBarVisible, setStatusBarVisible] = useState(true);
@@ -33,6 +37,15 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
 
   const toggleMenu = (menu: MenuName) => {
     setOpenMenu((current) => (current === menu ? null : menu));
+  };
+
+  const openMenuWithKeyboard = (menu: MenuName) => {
+    setOpenMenu(menu);
+  };
+
+  const closeMenu = (menu: MenuName) => {
+    setOpenMenu(null);
+    triggerRefs.current[menu]?.focus();
   };
 
   const selectAll = () => {
@@ -44,12 +57,10 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
     range.selectNodeContents(documentElement);
     selection.removeAllRanges();
     selection.addRange(range);
-    setOpenMenu(null);
     setStatusMessage("All About Harry text selected");
   };
 
   const copyDocument = async () => {
-    setOpenMenu(null);
     if (!navigator.clipboard?.writeText) {
       setStatusMessage("Copy is unavailable in this browser");
       return;
@@ -78,10 +89,21 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
         {(Object.keys(menuLabels) as MenuName[]).map((menu) => (
           <div className="about-notepad__menu-group" key={menu}>
             <button
+              aria-controls={`${notepadId}-${menu}-menu`}
               aria-expanded={openMenu === menu}
               aria-haspopup="menu"
               className="about-notepad__menu-trigger"
+              id={`${notepadId}-${menu}-trigger`}
               onClick={() => toggleMenu(menu)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                  event.preventDefault();
+                  openMenuWithKeyboard(menu);
+                }
+              }}
+              ref={(element) => {
+                triggerRefs.current[menu] = element;
+              }}
               type="button"
             >
               {menuLabels[menu]}
@@ -89,22 +111,31 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
             {openMenu === menu ? (
               <MenuPanel
                 closeWindow={closeWindow}
+                menuId={`${notepadId}-${menu}-menu`}
                 menu={menu}
-                onCopy={() => void copyDocument()}
+                onCopy={() => {
+                  closeMenu(menu);
+                  void copyDocument();
+                }}
                 onOpenAbout={() => {
-                  setOpenMenu(null);
+                  closeMenu(menu);
                   setAboutVisible(true);
                 }}
-                onSelectAll={selectAll}
+                onDismiss={() => closeMenu(menu)}
+                onSelectAll={() => {
+                  selectAll();
+                  setOpenMenu(null);
+                }}
                 onToggleStatusBar={() => {
                   setStatusBarVisible((visible) => !visible);
-                  setOpenMenu(null);
+                  closeMenu(menu);
                 }}
                 onToggleWordWrap={() => {
                   setWordWrap((wrapped) => !wrapped);
-                  setOpenMenu(null);
+                  closeMenu(menu);
                 }}
                 statusBarVisible={statusBarVisible}
+                triggerId={`${notepadId}-${menu}-trigger`}
                 wordWrap={wordWrap}
               />
             ) : null}
@@ -119,9 +150,7 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
           data-testid="notepad-document"
           ref={documentRef}
         >
-          <ReactMarkdown components={{ a: MarkdownLink }}>
-            {aboutMarkdown}
-          </ReactMarkdown>
+          <MarkdownDocument markdown={aboutMarkdown} />
         </article>
       </main>
 
@@ -149,6 +178,8 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
 
 type MenuPanelProps = {
   menu: MenuName;
+  menuId: string;
+  triggerId: string;
   wordWrap: boolean;
   statusBarVisible: boolean;
   closeWindow(): void;
@@ -157,10 +188,13 @@ type MenuPanelProps = {
   onToggleWordWrap(): void;
   onToggleStatusBar(): void;
   onOpenAbout(): void;
+  onDismiss(): void;
 };
 
 function MenuPanel({
   menu,
+  menuId,
+  triggerId,
   wordWrap,
   statusBarVisible,
   closeWindow,
@@ -169,65 +203,141 @@ function MenuPanel({
   onToggleWordWrap,
   onToggleStatusBar,
   onOpenAbout,
+  onDismiss,
 }: MenuPanelProps) {
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [activeItemIndex, setActiveItemIndex] = useState(0);
+
+  useEffect(() => {
+    const firstEnabledIndex = itemRefs.current.findIndex(
+      (item) => item && !item.disabled,
+    );
+    if (firstEnabledIndex < 0) return;
+    setActiveItemIndex(firstEnabledIndex);
+    itemRefs.current[firstEnabledIndex]?.focus();
+  }, []);
+
+  const itemProps = (index: number) => ({
+    itemRef: (element: HTMLButtonElement | null) => {
+      itemRefs.current[index] = element;
+    },
+    onFocus: () => setActiveItemIndex(index),
+    tabIndex: activeItemIndex === index ? 0 : -1,
+  });
+
+  const moveFocus = (direction: "first" | "last" | "next" | "previous") => {
+    const enabledItems = itemRefs.current.filter(
+      (item): item is HTMLButtonElement => Boolean(item && !item.disabled),
+    );
+    if (enabledItems.length === 0) return;
+
+    const currentIndex = enabledItems.indexOf(document.activeElement as HTMLButtonElement);
+    const startsAtLast = direction === "previous" || direction === "last";
+    const targetIndex =
+      direction === "first"
+        ? 0
+        : direction === "last"
+          ? enabledItems.length - 1
+          : currentIndex === -1
+            ? startsAtLast
+              ? enabledItems.length - 1
+              : 0
+          : direction === "next"
+            ? (currentIndex + 1 + enabledItems.length) % enabledItems.length
+            : (currentIndex - 1 + enabledItems.length) % enabledItems.length;
+    const target = enabledItems[targetIndex];
+    setActiveItemIndex(itemRefs.current.indexOf(target));
+    target.focus();
+  };
+
   return (
     <div
-      aria-label={menuLabels[menu]}
+      aria-labelledby={triggerId}
       className="about-notepad__menu"
+      id={menuId}
+      onKeyDown={(event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moveFocus("next");
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moveFocus("previous");
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          moveFocus("first");
+        } else if (event.key === "End") {
+          event.preventDefault();
+          moveFocus("last");
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          onDismiss();
+        }
+      }}
       role="menu"
     >
       {menu === "file" ? (
         <>
-          <MenuItem disabled>New</MenuItem>
-          <MenuItem disabled>Open...</MenuItem>
-          <MenuItem disabled>Save</MenuItem>
+          <MenuItem disabled {...itemProps(0)}>New</MenuItem>
+          <MenuItem disabled {...itemProps(1)}>Open...</MenuItem>
+          <MenuItem disabled {...itemProps(2)}>Save</MenuItem>
           <MenuSeparator />
-          <MenuItem onClick={closeWindow}>Close</MenuItem>
+          <MenuItem {...itemProps(3)} onClick={closeWindow}>Close</MenuItem>
         </>
       ) : null}
       {menu === "edit" ? (
         <>
-          <MenuItem disabled>Undo</MenuItem>
+          <MenuItem disabled {...itemProps(0)}>Undo</MenuItem>
           <MenuSeparator />
-          <MenuItem disabled>Cut</MenuItem>
-          <MenuItem onClick={onCopy}>Copy</MenuItem>
-          <MenuItem disabled>Paste</MenuItem>
+          <MenuItem disabled {...itemProps(1)}>Cut</MenuItem>
+          <MenuItem {...itemProps(2)} onClick={onCopy}>Copy</MenuItem>
+          <MenuItem disabled {...itemProps(3)}>Paste</MenuItem>
           <MenuSeparator />
-          <MenuItem onClick={onSelectAll}>Select All</MenuItem>
+          <MenuItem {...itemProps(4)} onClick={onSelectAll}>Select All</MenuItem>
         </>
       ) : null}
       {menu === "format" ? (
-        <MenuCheckbox checked={wordWrap} onClick={onToggleWordWrap}>
+        <MenuCheckbox {...itemProps(0)} checked={wordWrap} onClick={onToggleWordWrap}>
           Word Wrap
         </MenuCheckbox>
       ) : null}
       {menu === "view" ? (
-        <MenuCheckbox checked={statusBarVisible} onClick={onToggleStatusBar}>
+        <MenuCheckbox {...itemProps(0)} checked={statusBarVisible} onClick={onToggleStatusBar}>
           Status Bar
         </MenuCheckbox>
       ) : null}
       {menu === "help" ? (
-        <MenuItem onClick={onOpenAbout}>About This Portfolio</MenuItem>
+        <MenuItem {...itemProps(0)} onClick={onOpenAbout}>About This Portfolio</MenuItem>
       ) : null}
     </div>
   );
 }
 
+type MenuItemProps = {
+  children: string;
+  disabled?: boolean;
+  onClick?: () => void;
+  onFocus(): void;
+  tabIndex: number;
+  itemRef(element: HTMLButtonElement | null): void;
+};
+
 function MenuItem({
   children,
   disabled = false,
   onClick,
-}: {
-  children: string;
-  disabled?: boolean;
-  onClick?: () => void;
-}) {
+  onFocus,
+  tabIndex,
+  itemRef,
+}: MenuItemProps) {
   return (
     <button
       className="about-notepad__menu-item"
       disabled={disabled}
       onClick={onClick}
+      onFocus={onFocus}
+      ref={itemRef}
       role="menuitem"
+      tabIndex={tabIndex}
       type="button"
     >
       {children}
@@ -235,21 +345,32 @@ function MenuItem({
   );
 }
 
+type MenuCheckboxProps = {
+  children: string;
+  checked: boolean;
+  onClick(): void;
+  onFocus(): void;
+  tabIndex: number;
+  itemRef(element: HTMLButtonElement | null): void;
+};
+
 function MenuCheckbox({
   children,
   checked,
   onClick,
-}: {
-  children: string;
-  checked: boolean;
-  onClick(): void;
-}) {
+  onFocus,
+  tabIndex,
+  itemRef,
+}: MenuCheckboxProps) {
   return (
     <button
       aria-checked={checked}
       className="about-notepad__menu-item"
       onClick={onClick}
+      onFocus={onFocus}
+      ref={itemRef}
       role="menuitemcheckbox"
+      tabIndex={tabIndex}
       type="button"
     >
       <span aria-hidden="true" className="about-notepad__menu-check">
@@ -262,6 +383,14 @@ function MenuCheckbox({
 
 function MenuSeparator() {
   return <span className="about-notepad__menu-separator" role="separator" />;
+}
+
+export function MarkdownDocument({ markdown }: { markdown: string }) {
+  return (
+    <ReactMarkdown components={{ a: MarkdownLink }}>
+      {markdown}
+    </ReactMarkdown>
+  );
 }
 
 function MarkdownLink({

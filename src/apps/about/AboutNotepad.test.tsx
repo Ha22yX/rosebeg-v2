@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AboutNotepad } from "@/apps/about/AboutNotepad";
+import {
+  AboutNotepad,
+  MarkdownDocument,
+} from "@/apps/about/AboutNotepad";
 import { aboutMarkdown } from "@/content/about";
 
 describe("AboutNotepad", () => {
@@ -39,6 +42,56 @@ describe("AboutNotepad", () => {
     expect(screen.getByTestId("notepad-document")).toHaveClass("is-word-wrapped");
   });
 
+  it("operates menus with a roving enabled-item keyboard model", async () => {
+    const user = userEvent.setup();
+    const closeWindow = vi.fn();
+    render(<AboutNotepad closeWindow={closeWindow} />);
+
+    const edit = screen.getByRole("button", { name: "Edit" });
+    edit.focus();
+    await user.keyboard("{ArrowDown}");
+
+    const editMenu = screen.getByRole("menu", { name: "Edit" });
+    const copy = screen.getByRole("menuitem", { name: "Copy" });
+    const selectAll = screen.getByRole("menuitem", { name: "Select All" });
+    expect(edit).toHaveAttribute("aria-controls", editMenu.id);
+    expect(copy).toHaveFocus();
+
+    await user.keyboard("{ArrowDown}");
+    expect(selectAll).toHaveFocus();
+    await user.keyboard("{ArrowDown}");
+    expect(copy).toHaveFocus();
+    await user.keyboard("{End}");
+    expect(selectAll).toHaveFocus();
+    await user.keyboard("{Home}");
+    expect(copy).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("menu", { name: "Edit" })).not.toBeInTheDocument();
+    expect(edit).toHaveFocus();
+
+    const format = screen.getByRole("button", { name: "Format" });
+    format.focus();
+    await user.keyboard("{ArrowDown}");
+    const wordWrap = screen.getByRole("menuitemcheckbox", { name: "Word Wrap" });
+    expect(wordWrap).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByTestId("notepad-document")).toHaveClass("is-word-wrapped");
+    expect(format).toHaveFocus();
+  });
+
+  it("keeps executable Markdown schemes and raw HTML inert", () => {
+    const { container } = render(
+      <MarkdownDocument
+        markdown={'[Unsafe Markdown](javascript:alert(1))\n\n<a href="javascript:alert(1)">Raw HTML</a>'}
+      />,
+    );
+
+    expect(screen.getByText("Unsafe Markdown")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Unsafe Markdown" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Raw HTML" })).not.toBeInTheDocument();
+    expect(container.querySelector('[href^="javascript:"]')).toBeNull();
+  });
+
   it("selects the complete document from Edit and closes the menu with Escape", async () => {
     const user = userEvent.setup();
     render(<AboutNotepad closeWindow={vi.fn()} />);
@@ -73,6 +126,9 @@ describe("AboutNotepad", () => {
     expect(screen.getByRole("dialog", { name: "About This Portfolio" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Close About This Portfolio" }));
+    expect(
+      screen.queryByRole("dialog", { name: "About This Portfolio" }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "File" }));
     const newCommand = screen.getByRole("menuitem", { name: "New" });
     expect(newCommand).toBeDisabled();
