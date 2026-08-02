@@ -48,11 +48,15 @@ export function PicturesBrowser({ onOpenPhoto }: PicturesBrowserProps) {
           Forward
         </XpButton>
         <span aria-hidden="true" className="pictures-browser__separator" />
-        <XpButton className="pictures-browser__toolbar-button">
+        <XpButton className="pictures-browser__toolbar-button" disabled>
           <span aria-hidden="true">⌕</span>
           Search
         </XpButton>
-        <XpButton aria-pressed="true" className="pictures-browser__toolbar-button">
+        <XpButton
+          aria-pressed="true"
+          className="pictures-browser__toolbar-button"
+          disabled
+        >
           <span aria-hidden="true">▤</span>
           Folders
         </XpButton>
@@ -115,14 +119,14 @@ function PictureTasks({ selectedPhoto }: { selectedPhoto: PhotoItem | undefined 
   return (
     <aside aria-label="Picture tasks" className="pictures-browser__task-pane">
       <TaskGroup title="Picture Tasks">
-        <p>View as a slide show</p>
-        <p>Order prints online</p>
-        <p>Print this picture</p>
+        <DisabledAction>View as a slide show</DisabledAction>
+        <DisabledAction>Order prints online</DisabledAction>
+        <DisabledAction>Print this picture</DisabledAction>
       </TaskGroup>
       <TaskGroup title="Other Places">
-        <p>My Documents</p>
-        <p>Shared Pictures</p>
-        <p>Desktop</p>
+        <DisabledAction>My Documents</DisabledAction>
+        <DisabledAction>Shared Pictures</DisabledAction>
+        <DisabledAction>Desktop</DisabledAction>
       </TaskGroup>
       <TaskGroup title="Details">
         {selectedPhoto ? (
@@ -136,6 +140,18 @@ function PictureTasks({ selectedPhoto }: { selectedPhoto: PhotoItem | undefined 
         )}
       </TaskGroup>
     </aside>
+  );
+}
+
+function DisabledAction({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      aria-disabled="true"
+      className="pictures-browser__disabled-action"
+      title="Unavailable in this version"
+    >
+      {children}
+    </span>
   );
 }
 

@@ -36,6 +36,12 @@ export function rotate(
   return ((current + delta + 360) % 360) as ViewerState["rotation"];
 }
 
+export function fitAxisForRotation(
+  rotation: ViewerState["rotation"],
+): "normal" | "swapped" {
+  return rotation === 90 || rotation === 270 ? "swapped" : "normal";
+}
+
 export function photoStateReducer(
   state: ViewerState,
   action: ViewerAction,
@@ -61,7 +67,7 @@ export function photoStateReducer(
     case "ACTUAL_SIZE":
       return { ...state, zoom: 100, fitToWindow: false };
     case "FIT_TO_WINDOW":
-      return { ...state, fitToWindow: true };
+      return { ...state, zoom: 100, fitToWindow: true };
     case "ROTATE":
       return { ...state, rotation: rotate(state.rotation, action.delta) };
   }

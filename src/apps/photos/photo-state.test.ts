@@ -1,5 +1,6 @@
 import {
   clampZoom,
+  fitAxisForRotation,
   nextIndex,
   photoStateReducer,
   rotate,
@@ -28,5 +29,27 @@ describe("photo state", () => {
 
     const zoomedOut = photoStateReducer(zoomedIn, { type: "ZOOM", delta: -1 });
     expect(zoomedOut).toEqual({ ...initial, fitToWindow: false });
+  });
+
+  it("resets manual zoom when returning to fit-to-window mode", () => {
+    const zoomed: ViewerState = {
+      index: 0,
+      zoom: 300,
+      rotation: 0,
+      fitToWindow: false,
+    };
+
+    expect(photoStateReducer(zoomed, { type: "FIT_TO_WINDOW" })).toEqual({
+      ...zoomed,
+      zoom: 100,
+      fitToWindow: true,
+    });
+  });
+
+  it("swaps fit axes for both quarter-turn rotations", () => {
+    expect(fitAxisForRotation(0)).toBe("normal");
+    expect(fitAxisForRotation(90)).toBe("swapped");
+    expect(fitAxisForRotation(180)).toBe("normal");
+    expect(fitAxisForRotation(270)).toBe("swapped");
   });
 });

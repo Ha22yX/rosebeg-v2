@@ -1,5 +1,9 @@
-import { useEffect, useId, useReducer, useState } from "react";
-import { photoStateReducer, type ViewerState } from "@/apps/photos/photo-state";
+import { useReducer, useState, type KeyboardEvent } from "react";
+import {
+  fitAxisForRotation,
+  photoStateReducer,
+  type ViewerState,
+} from "@/apps/photos/photo-state";
 import { photos } from "@/content/photos";
 import { XpButton } from "@/shared/XpButton";
 import "@/apps/photos/photos.css";
@@ -8,10 +12,7 @@ export type PictureViewerProps = {
   initialSlug: string;
 };
 
-let activeViewerId: string | null = null;
-
 export function PictureViewer({ initialSlug }: PictureViewerProps) {
-  const viewerId = useId();
   const [state, dispatch] = useReducer(
     photoStateReducer,
     initialSlug,
@@ -34,28 +35,17 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
     dispatch({ type: "NAVIGATE", delta, length: photos.length });
   };
 
-  useEffect(() => {
-    activeViewerId = viewerId;
-
-    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (activeViewerId !== viewerId) return;
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        navigate(-1);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        navigate(1);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      if (activeViewerId === viewerId) activeViewerId = null;
-    };
-  }, [viewerId]);
-
   if (!photo) return null;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      navigate(-1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      navigate(1);
+    }
+  };
 
   const modeLabel =
     sizeMode === "fit"
@@ -68,12 +58,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
     <section
       aria-label="Windows Picture and Fax Viewer"
       className="picture-viewer"
-      onFocusCapture={() => {
-        activeViewerId = viewerId;
-      }}
-      onPointerDownCapture={() => {
-        activeViewerId = viewerId;
-      }}
+      onKeyDown={handleKeyDown}
       tabIndex={0}
     >
       <nav aria-label="Picture viewer controls" className="picture-viewer__toolbar">
@@ -151,6 +136,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
         ) : (
           <img
             alt={photo.title}
+            data-fit-axis={fitAxisForRotation(state.rotation)}
             decoding="async"
             onError={() => setImageUnavailable(true)}
             src={photo.imageSrc}

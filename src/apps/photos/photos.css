@@ -54,6 +54,10 @@
   font-weight: 700;
 }
 
+.pictures-browser__toolbar-button:disabled > span:first-child {
+  color: #aaa79b;
+}
+
 .pictures-browser__toolbar-button[aria-pressed="true"],
 .pictures-browser__toolbar-button:hover:not(:disabled),
 .pictures-browser__view-button:hover,
@@ -172,6 +176,19 @@
 
 .pictures-browser__task-body p {
   margin: 0;
+}
+
+.pictures-browser__disabled-action {
+  color: #626b7e;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.pictures-browser__disabled-action::before {
+  content: "×";
+  margin-right: 5px;
+  color: #8a8f9a;
+  font-weight: 700;
 }
 
 .pictures-browser__content {
@@ -571,6 +588,7 @@
   flex: 1;
   overflow: auto;
   overscroll-behavior: contain;
+  container-type: size;
   background:
     linear-gradient(45deg, #d1d1d1 25%, transparent 25%) 0 0 / 12px 12px,
     linear-gradient(45deg, transparent 75%, #d1d1d1 75%) 0 0 / 12px 12px,
@@ -591,10 +609,15 @@
 }
 
 .picture-viewer__viewport--fit img {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  width: auto;
+  height: auto;
+  max-width: calc(100cqw - 28px);
+  max-height: calc(100cqh - 28px);
+}
+
+.picture-viewer__viewport--fit img[data-fit-axis="swapped"] {
+  max-width: calc(100cqh - 28px);
+  max-height: calc(100cqw - 28px);
 }
 
 .picture-viewer__viewport--actual {

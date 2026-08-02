@@ -82,4 +82,20 @@ describe("PicturesBrowser", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("exposes unfinished Explorer and task actions as non-interactive", () => {
+    render(<PicturesBrowser onOpenPhoto={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: "Search" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Folders" })).toBeDisabled();
+    expect(screen.getByText("View as a slide show")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByText("Order prints online")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByText("My Documents")).toHaveAttribute("aria-disabled", "true");
+  });
 });
