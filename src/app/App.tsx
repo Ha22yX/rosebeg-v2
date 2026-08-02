@@ -1,5 +1,12 @@
 import "@/app/app.css";
+import { SystemRoot } from "@/system/SystemRoot";
 
 export function App() {
-  return <div aria-label="Rosebeg XP system" className="app-root" />;
+  return (
+    <main aria-label="Rosebeg XP system" className="app-root">
+      <SystemRoot>
+        <div />
+      </SystemRoot>
+    </main>
+  );
 }
