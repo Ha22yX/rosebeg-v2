@@ -1,6 +1,7 @@
 import { act } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { AboutNotepad } from "@/apps/about/AboutNotepad";
 import {
   WindowManagerProvider,
   useWindowManager,
@@ -46,6 +47,18 @@ const registry: WindowRegistry = {
     render: ({ windowId }) => (
       <button type="button">Explorer action {windowId}</button>
     ),
+  },
+};
+
+const modalRegistry: WindowRegistry = {
+  ...registry,
+  "about-notepad": {
+    appId: "about-notepad",
+    title: "About Harry - Notepad",
+    icon: "/assets/icons/notepad.png",
+    idealSize: { width: 660, height: 520 },
+    minimumSize: { width: 360, height: 300 },
+    render: ({ close }) => <AboutNotepad closeWindow={close} />,
   },
 };
 
@@ -185,6 +198,40 @@ describe("WindowManagerProvider", () => {
     expect(screen.getByRole("dialog", { name: "My Projects" })).toContainElement(
       document.activeElement as HTMLElement,
     );
+  });
+
+  it("keeps focus in a visible modal when its window is reactivated from the taskbar", async () => {
+    const user = userEvent.setup();
+    render(
+      <WindowManagerProvider
+        desktopSize={{ width: 1000, height: 700 }}
+        registry={modalRegistry}
+      >
+        <ModalHarness />
+      </WindowManagerProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Launch About" }));
+    const help = screen.getByRole("button", { name: "Help" });
+    await user.click(help);
+    await user.click(
+      screen.getByRole("menuitem", { name: "About This Portfolio" }),
+    );
+    const modal = screen.getByRole("dialog", {
+      name: "About This Portfolio",
+    });
+
+    await user.click(screen.getByRole("button", { name: "Launch sibling" }));
+    await user.click(
+      screen.getByRole("button", { name: /Task About Harry - Notepad/ }),
+    );
+
+    expect(modal).toContainElement(document.activeElement as HTMLElement);
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: "About This Portfolio" }),
+    ).not.toBeInTheDocument();
+    expect(help).toHaveFocus();
   });
 
   it("moves a normal frame by its title bar and releases pointer capture", async () => {
@@ -415,6 +462,34 @@ function CrashHarness() {
       <button onClick={() => manager.launch("projects-explorer")} type="button">
         Launch broken
       </button>
+    </>
+  );
+}
+
+function ModalHarness() {
+  const manager = useWindowManager();
+
+  return (
+    <>
+      <button onClick={() => manager.launch("about-notepad")} type="button">
+        Launch About
+      </button>
+      <button
+        onClick={() => manager.launch("projects-explorer")}
+        type="button"
+      >
+        Launch sibling
+      </button>
+      {manager.windows.map((windowInstance) => (
+        <button
+          aria-label={`Task ${windowInstance.title} ${windowInstance.id}`}
+          key={windowInstance.id}
+          onClick={() => manager.toggleTaskbar(windowInstance.id)}
+          type="button"
+        >
+          {windowInstance.title}
+        </button>
+      ))}
     </>
   );
 }

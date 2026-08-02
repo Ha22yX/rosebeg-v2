@@ -91,12 +91,23 @@ export function WindowFrame({
   useEffect(() => {
     if (!active) return;
     const frame = frameRef.current;
-    if (!frame || frame.contains(document.activeElement)) return;
+    const body = bodyRef.current;
+    const modal = body?.querySelector<HTMLElement>(
+      '[aria-modal="true"]:not([hidden]):not([aria-hidden="true"])',
+    );
+    if (
+      !frame ||
+      (frame.contains(document.activeElement) &&
+        (!modal || modal.contains(document.activeElement)))
+    ) {
+      return;
+    }
 
     const focusTarget =
-      bodyRef.current?.querySelector<HTMLElement>(
-        "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])",
-      ) ?? frame;
+      modal?.querySelector<HTMLElement>(focusableSelector) ??
+      modal ??
+      body?.querySelector<HTMLElement>(focusableSelector) ??
+      frame;
     focusTarget.focus({ preventScroll: true });
   }, [active]);
 
@@ -313,3 +324,6 @@ function resizeHandleBoundaryStyle(direction: ResizeDirection): CSSProperties {
     ...(direction.includes("west") ? { left: 0 } : {}),
   };
 }
+
+const focusableSelector =
+  "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])";
