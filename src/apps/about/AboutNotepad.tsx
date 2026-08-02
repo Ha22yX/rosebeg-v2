@@ -163,7 +163,9 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
       {aboutVisible ? (
         <div className="about-notepad__dialog-layer">
           <XpDialog
+            modal
             onClose={() => setAboutVisible(false)}
+            onDismiss={() => setAboutVisible(false)}
             title="About This Portfolio"
           >
             <p>

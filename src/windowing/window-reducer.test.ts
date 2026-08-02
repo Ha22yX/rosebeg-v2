@@ -56,12 +56,12 @@ describe("windowReducer", () => {
     expect(focused.windows[0].zIndex).toBeGreaterThan(
       focused.windows[1].zIndex,
     );
-    expect(moved.windows[0].bounds).toMatchObject({ x: 0, y: 80 });
+    expect(moved.windows[0].bounds).toMatchObject({ x: 12, y: 68 });
     expect(resized.windows[0].bounds).toEqual({
-      x: 0,
-      y: 0,
-      width: 1000,
-      height: 700,
+      x: 12,
+      y: 12,
+      width: 976,
+      height: 676,
     });
 
     const maximized = windowReducer(resized, { type: "MAXIMIZE", id: "w1" });
@@ -138,16 +138,39 @@ describe("windowReducer", () => {
     });
 
     expect(resizedDesktop.windows[0].bounds).toEqual({
-      x: 0,
-      y: 0,
-      width: 700,
-      height: 500,
+      x: 12,
+      y: 12,
+      width: 676,
+      height: 476,
     });
     expect(resizedDesktop.windows[1].bounds).toEqual({
       x: 0,
       y: 0,
       width: 700,
       height: 500,
+    });
+  });
+
+  it("keeps a large normal Explorer bounded after a 390x844 viewport resize", () => {
+    const largeDesktop = windowReducer(initialWindowState, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 1920, height: 1048 },
+    });
+    const launched = windowReducer(largeDesktop, {
+      type: "LAUNCH",
+      id: "w1",
+      definition: projectWindowDefinition,
+      payload: {},
+    });
+    const narrowDesktop = windowReducer(launched, {
+      type: "SET_DESKTOP_SIZE",
+      size: { width: 390, height: 812 },
+    });
+
+    expect(narrowDesktop.windows[0]).toMatchObject({
+      mode: "normal",
+      bounds: { x: 12, y: 180, width: 366, height: 620 },
+      restoreBounds: { x: 12, y: 180, width: 366, height: 620 },
     });
   });
 

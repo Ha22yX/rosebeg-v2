@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { projects } from "@/content/projects";
@@ -225,4 +226,35 @@ describe("ProjectsExplorer", () => {
     expect(screen.getByLabelText("Address")).toHaveValue("C:\\My Projects");
     expect(screen.getByText("9 objects")).toBeInTheDocument();
   });
+
+  it("makes the invalid-project warning modal and restores its invoker", async () => {
+    const user = userEvent.setup();
+    render(<InvalidProjectHarness />);
+    const invoker = screen.getByRole("button", { name: "Open missing project" });
+
+    await user.click(invoker);
+
+    const dialog = screen.getByRole("dialog", { name: "Windows Explorer" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByRole("button", { name: "OK" })).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: "Windows Explorer" }),
+    ).not.toBeInTheDocument();
+    expect(invoker).toHaveFocus();
+  });
 });
+
+function InvalidProjectHarness() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} type="button">
+        Open missing project
+      </button>
+      {open ? <ProjectsExplorer initialProjectSlug="missing-project" /> : null}
+    </>
+  );
+}

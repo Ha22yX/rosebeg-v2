@@ -148,6 +148,7 @@ async function capture(page: Page, name: string): Promise<void> {
     false,
   );
   await expect(page).toHaveScreenshot(name, {
+    maskColor: "#0b83d5",
     mask: [
       page
         .getByRole("complementary", {

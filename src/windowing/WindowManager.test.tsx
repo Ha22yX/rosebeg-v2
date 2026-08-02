@@ -1,3 +1,4 @@
+import { act } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
@@ -42,7 +43,9 @@ const registry: WindowRegistry = {
     icon: "/assets/icons/projects.png",
     idealSize: { width: 900, height: 620 },
     minimumSize: { width: 520, height: 420 },
-    render: ({ windowId }) => <p>Explorer instance {windowId}</p>,
+    render: ({ windowId }) => (
+      <button type="button">Explorer action {windowId}</button>
+    ),
   },
 };
 
@@ -130,6 +133,60 @@ describe("WindowManagerProvider", () => {
     ).toHaveLength(2);
   });
 
+  it("activates a background window when one of its descendants receives focus", async () => {
+    const user = userEvent.setup();
+    renderManager();
+
+    await user.click(screen.getByRole("button", { name: "Launch project" }));
+    await user.click(screen.getByRole("button", { name: "Launch project" }));
+    const actions = screen.getAllByRole("button", {
+      name: /Explorer action projects-explorer-/,
+    });
+    const tasks = screen.getAllByRole("button", { name: /Task My Projects/ });
+
+    act(() => actions[0]!.focus());
+
+    expect(actions[0]).toHaveFocus();
+    expect(tasks[0]).toHaveAttribute("aria-pressed", "true");
+    expect(tasks[1]).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("moves DOM focus with launch, taskbar, minimize, restore, and close activation", async () => {
+    const user = userEvent.setup();
+    renderManager();
+    const launcher = screen.getByRole("button", { name: "Launch project" });
+
+    await user.click(launcher);
+    const firstWindow = screen.getByRole("dialog", { name: "My Projects" });
+    expect(firstWindow).toContainElement(document.activeElement as HTMLElement);
+
+    await user.click(launcher);
+    let windows = screen.getAllByRole("dialog", { name: "My Projects" });
+    expect(windows[1]).toContainElement(document.activeElement as HTMLElement);
+
+    const tasks = screen.getAllByRole("button", { name: /Task My Projects/ });
+    await user.click(tasks[0]!);
+    windows = screen.getAllByRole("dialog", { name: "My Projects" });
+    expect(windows[0]).toContainElement(document.activeElement as HTMLElement);
+
+    await user.click(
+      within(windows[0]!).getByRole("button", { name: "Minimize My Projects" }),
+    );
+    const remainingWindow = screen.getByRole("dialog", { name: "My Projects" });
+    expect(remainingWindow).toContainElement(document.activeElement as HTMLElement);
+
+    await user.click(tasks[0]!);
+    windows = screen.getAllByRole("dialog", { name: "My Projects" });
+    expect(windows[0]).toContainElement(document.activeElement as HTMLElement);
+
+    await user.click(
+      within(windows[0]!).getByRole("button", { name: "Close My Projects" }),
+    );
+    expect(screen.getByRole("dialog", { name: "My Projects" })).toContainElement(
+      document.activeElement as HTMLElement,
+    );
+  });
+
   it("moves a normal frame by its title bar and releases pointer capture", async () => {
     const user = userEvent.setup();
     const setPointerCapture = vi
@@ -156,7 +213,7 @@ describe("WindowManagerProvider", () => {
     });
     fireEvent.pointerUp(titleBar, { pointerId: 7 });
 
-    expect(frame).toHaveStyle({ left: "100px", top: "70px" });
+    expect(frame).toHaveStyle({ left: "88px", top: "68px" });
     expect(setPointerCapture).toHaveBeenCalledWith(7);
     expect(releasePointerCapture).toHaveBeenCalledWith(7);
 
@@ -332,6 +389,10 @@ function ManagerHarness() {
       {manager.windows.map((windowInstance) => (
         <button
           aria-label={`Task ${windowInstance.title} ${windowInstance.id}`}
+          aria-pressed={
+            manager.activeWindowId === windowInstance.id &&
+            windowInstance.mode !== "minimized"
+          }
           key={windowInstance.id}
           onClick={() => manager.toggleTaskbar(windowInstance.id)}
           type="button"

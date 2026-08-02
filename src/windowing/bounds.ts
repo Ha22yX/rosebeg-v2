@@ -14,8 +14,10 @@ export function fitInitialBounds(
 ): Rect {
   const desktopWidth = Math.max(0, desktopSize.width);
   const desktopHeight = Math.max(0, desktopSize.height);
-  const horizontalMargin = desktopWidth > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
-  const verticalMargin = desktopHeight > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const horizontalMargin =
+    desktopWidth > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const verticalMargin =
+    desktopHeight > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
   const usableWidth = desktopWidth - horizontalMargin * 2;
   const usableHeight = desktopHeight - verticalMargin * 2;
   const narrowLayout = usableWidth < definition.minimumSize.width;
@@ -57,12 +59,30 @@ export function fitInitialBounds(
 }
 
 export function clampBounds(bounds: Rect, desktopSize: DesktopSize): Rect {
-  const width = Math.min(Math.max(0, bounds.width), desktopSize.width);
-  const height = Math.min(Math.max(0, bounds.height), desktopSize.height);
+  const desktopWidth = Math.max(0, desktopSize.width);
+  const desktopHeight = Math.max(0, desktopSize.height);
+  const horizontalMargin = desktopWidth > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const verticalMargin = desktopHeight > INITIAL_MARGIN * 2 ? INITIAL_MARGIN : 0;
+  const width = Math.min(
+    Math.max(0, bounds.width),
+    desktopWidth - horizontalMargin * 2,
+  );
+  const height = Math.min(
+    Math.max(0, bounds.height),
+    desktopHeight - verticalMargin * 2,
+  );
 
   return {
-    x: clamp(bounds.x, 0, desktopSize.width - width),
-    y: clamp(bounds.y, 0, desktopSize.height - height),
+    x: clamp(
+      bounds.x,
+      horizontalMargin,
+      desktopWidth - horizontalMargin - width,
+    ),
+    y: clamp(
+      bounds.y,
+      verticalMargin,
+      desktopHeight - verticalMargin - height,
+    ),
     width,
     height,
   };

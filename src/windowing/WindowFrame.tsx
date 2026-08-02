@@ -76,6 +76,8 @@ export function WindowFrame({
 }: WindowFrameProps) {
   const titleId = useId();
   const pointerOperation = useRef<PointerOperation | null>(null);
+  const frameRef = useRef<HTMLElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const { bounds, mode, title } = windowInstance;
 
   useEffect(
@@ -85,6 +87,18 @@ export function WindowFrame({
     },
     [],
   );
+
+  useEffect(() => {
+    if (!active) return;
+    const frame = frameRef.current;
+    if (!frame || frame.contains(document.activeElement)) return;
+
+    const focusTarget =
+      bodyRef.current?.querySelector<HTMLElement>(
+        "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])",
+      ) ?? frame;
+    focusTarget.focus({ preventScroll: true });
+  }, [active]);
 
   const style: CSSProperties = {
     left: bounds.x,
@@ -166,9 +180,12 @@ export function WindowFrame({
       aria-labelledby={titleId}
       className={`xp-window xp-window--${mode}${active ? " is-active" : ""}`}
       data-window-mode={mode}
+      onFocusCapture={onFocus}
       onPointerDownCapture={onFocus}
+      ref={frameRef}
       role="dialog"
       style={style}
+      tabIndex={-1}
     >
       <header
         aria-label={`Move ${title} window`}
@@ -211,7 +228,9 @@ export function WindowFrame({
           </XpButton>
         </div>
       </header>
-      <div className="xp-window__body">{children}</div>
+      <div className="xp-window__body" ref={bodyRef}>
+        {children}
+      </div>
       {mode === "normal"
         ? resizeDirections.map((direction) => (
             <span

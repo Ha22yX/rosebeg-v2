@@ -156,7 +156,11 @@ export function WindowManagerProvider({
               desktopSize={state.desktopSize}
               key={windowInstance.id}
               onClose={() => close(windowInstance.id)}
-              onFocus={() => focus(windowInstance.id)}
+              onFocus={() => {
+                if (state.activeWindowId !== windowInstance.id) {
+                  focus(windowInstance.id);
+                }
+              }}
               onMaximize={() => maximize(windowInstance.id)}
               onMinimize={() => minimize(windowInstance.id)}
               onMove={(x, y) =>

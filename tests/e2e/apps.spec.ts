@@ -115,9 +115,6 @@ test("shows all photos, opens two viewers, and advances with ArrowRight", async 
   });
   await expect(viewers).toHaveCount(2);
   const secondViewer = viewers.nth(1);
-  await secondViewer
-    .getByRole("button", { name: "Previous photo", exact: true })
-    .focus();
   await page.keyboard.press("ArrowRight");
   await expect(
     secondViewer.getByRole("heading", {

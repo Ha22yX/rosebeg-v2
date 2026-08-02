@@ -29,11 +29,24 @@ test("manages two My Projects windows through the complete window lifecycle", as
   await expect(projectWindows).toHaveCount(2);
   await expect(secondTask).toHaveAttribute("aria-pressed", "true");
 
-  await firstTask.click();
+  const firstWindow = projectWindows.first();
+  const firstSearch = firstWindow.getByRole("button", {
+    name: "Search",
+    exact: true,
+  });
+  await firstSearch.focus();
+  await expect(firstSearch).toBeFocused();
   await expect(firstTask).toHaveAttribute("aria-pressed", "true");
   await expect(secondTask).toHaveAttribute("aria-pressed", "false");
 
-  const firstWindow = projectWindows.first();
+  await secondTask.click();
+  await expect(secondTask).toHaveAttribute("aria-pressed", "true");
+
+  await firstTask.click();
+  await expect(firstTask).toHaveAttribute("aria-pressed", "true");
+  await expect(secondTask).toHaveAttribute("aria-pressed", "false");
+  await expect(firstWindow.locator(":focus")).toHaveCount(1);
+
   const titleBar = page
     .getByLabel("Move My Projects window", { exact: true })
     .first();
@@ -68,10 +81,12 @@ test("manages two My Projects windows through the complete window lifecycle", as
     .click();
   await expect(projectWindows).toHaveCount(1);
   await expect(firstTask).toHaveAttribute("aria-pressed", "false");
+  await expect(projectWindows.locator(":focus")).toHaveCount(1);
 
   await firstTask.click();
   await expect(projectWindows).toHaveCount(2);
   await expect(firstTask).toHaveAttribute("aria-pressed", "true");
+  await expect(firstWindow.locator(":focus")).toHaveCount(1);
 
   await firstWindow
     .getByRole("button", { name: "Maximize My Projects", exact: true })
@@ -108,6 +123,7 @@ test("manages two My Projects windows through the complete window lifecycle", as
     .getByRole("button", { name: "Close My Projects", exact: true })
     .click();
   await expect(projectWindows).toHaveCount(1);
+  await expect(projectWindows.locator(":focus")).toHaveCount(1);
   await projectWindows
     .getByRole("button", { name: "Close My Projects", exact: true })
     .click();

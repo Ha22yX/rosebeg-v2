@@ -188,6 +188,10 @@ describe("DesktopShell", () => {
     fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
     vi.useRealTimers();
     const user = userEvent.setup();
+    expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     const expectedNames = [
       "My Projects",
@@ -296,7 +300,7 @@ describe("DesktopShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm Log Off" }));
     expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
 
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(450));
     expect(screen.getByTestId("login-screen")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
     act(() => vi.advanceTimersByTime(650));
@@ -342,7 +346,7 @@ describe("DesktopShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restart" }));
 
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(1_200));
     expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
   });
 
@@ -352,7 +356,7 @@ describe("DesktopShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
 
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(1_200));
     expect(screen.getByTestId("powered-off-screen")).toBeInTheDocument();
   });
 });

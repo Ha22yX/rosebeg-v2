@@ -40,8 +40,7 @@ type SystemRootProps = {
 export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
   const [state, dispatch] = useReducer(systemReducer, initialSystemState);
   const systemPrefersReducedMotion = usePrefersReducedMotion();
-  const transitionDelay =
-    (reducedMotion ?? systemPrefersReducedMotion) ? 150 : 650;
+  const prefersReducedMotion = reducedMotion ?? systemPrefersReducedMotion;
 
   useEffect(() => {
     const eventByPhase = {
@@ -54,9 +53,18 @@ export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
 
     if (!event) return;
 
+    const normalDelayByPhase = {
+      booting: 1_800,
+      "signing-in": 650,
+      "logging-off": 450,
+      "shutting-down": 1_200,
+    } as const;
+    const transitionDelay = prefersReducedMotion
+      ? 150
+      : normalDelayByPhase[state.phase as keyof typeof normalDelayByPhase];
     const timeoutId = window.setTimeout(() => dispatch(event), transitionDelay);
     return () => window.clearTimeout(timeoutId);
-  }, [state.phase, transitionDelay]);
+  }, [prefersReducedMotion, state.phase]);
 
   const actions = useMemo<SystemActions>(
     () => ({

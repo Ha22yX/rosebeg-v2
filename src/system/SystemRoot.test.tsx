@@ -4,9 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SystemRoot, useSystemActions } from "@/system/SystemRoot";
 
 function DesktopControls() {
-  const { requestTurnOff } = useSystemActions();
+  const { requestLogOff, requestTurnOff } = useSystemActions();
 
-  return <button onClick={requestTurnOff}>Turn Off</button>;
+  return (
+    <>
+      <button onClick={requestLogOff}>Log Off</button>
+      <button onClick={requestTurnOff}>Turn Off</button>
+    </>
+  );
 }
 
 describe("SystemRoot", () => {
@@ -44,6 +49,95 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByTestId("login-screen")).toBeInTheDocument();
+  });
+
+  it("keeps the normal boot screen visible for exactly 1800 ms", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <DesktopControls />
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_799));
+    expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("login-screen")).toBeInTheDocument();
+  });
+
+  it("keeps normal sign-in visible for exactly 650 ms", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <DesktopControls />
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_800));
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    act(() => vi.advanceTimersByTime(649));
+    expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByRole("button", { name: "Log Off" })).toBeInTheDocument();
+  });
+
+  it("keeps normal logoff visible for exactly 450 ms", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <DesktopControls />
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_800));
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    act(() => vi.advanceTimersByTime(650));
+    fireEvent.click(screen.getByRole("button", { name: "Log Off" }));
+    act(() => vi.advanceTimersByTime(449));
+    expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("login-screen")).toBeInTheDocument();
+  });
+
+  it("keeps normal shutdown visible for exactly 1200 ms", () => {
+    render(
+      <SystemRoot reducedMotion={false}>
+        <DesktopControls />
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(1_800));
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    act(() => vi.advanceTimersByTime(650));
+    fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
+    act(() => vi.advanceTimersByTime(1_199));
+    expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("powered-off-screen")).toBeInTheDocument();
+  });
+
+  it("uses exactly 150 ms for every reduced-motion timed phase", () => {
+    render(
+      <SystemRoot reducedMotion>
+        <DesktopControls />
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(149));
+    expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    act(() => vi.advanceTimersByTime(149));
+    expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    fireEvent.click(screen.getByRole("button", { name: "Log Off" }));
+    act(() => vi.advanceTimersByTime(149));
+    expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    fireEvent.click(screen.getByRole("button", { name: "Harry" }));
+    act(() => vi.advanceTimersByTime(150));
+    fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
+    act(() => vi.advanceTimersByTime(149));
+    expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("powered-off-screen")).toBeInTheDocument();
   });
 
   it("shows the desktop after booting and signing in with Harry", () => {

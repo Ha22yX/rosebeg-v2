@@ -12,10 +12,12 @@ import { localChatCopy } from "@/content/chat-responses";
 import { XpButton } from "@/shared/XpButton";
 import "@/apps/messenger/messenger.css";
 
-const storageKey = "rosebeg-v2:messenger";
+/** Session-storage key used by standalone Messenger mounts. */
+export const defaultMessengerStorageKey = "rosebeg-v2:messenger";
 
 export type HarryMessengerProps = {
   service?: ChatService;
+  storageKey?: string;
 };
 
 function createMessageId() {
@@ -56,7 +58,7 @@ function isChatMessage(value: unknown): value is ChatMessage {
   );
 }
 
-function initialMessages() {
+function initialMessages(storageKey: string) {
   if (typeof window !== "undefined") {
     try {
       const stored = window.sessionStorage.getItem(storageKey);
@@ -74,13 +76,18 @@ function initialMessages() {
   return [createMessage("harry", localChatCopy.welcome, "delivered")];
 }
 
-export function HarryMessenger({ service }: HarryMessengerProps) {
+export function HarryMessenger({
+  service,
+  storageKey = defaultMessengerStorageKey,
+}: HarryMessengerProps) {
   const composerId = useId();
   const localServiceRef = useRef<ChatService | null>(null);
   if (!localServiceRef.current) localServiceRef.current = new LocalChatService();
   const activeService = service ?? localServiceRef.current;
 
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    initialMessages(storageKey),
+  );
   const [draft, setDraft] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
@@ -105,7 +112,7 @@ export function HarryMessenger({ service }: HarryMessengerProps) {
 
     const transcript = transcriptRef.current;
     if (transcript) transcript.scrollTop = transcript.scrollHeight;
-  }, [messages]);
+  }, [messages, storageKey]);
 
   const sendMessage = async () => {
     const text = draft.trim();

@@ -152,4 +152,27 @@ describe("AboutNotepad", () => {
     await user.click(screen.getByRole("menuitem", { name: "Close" }));
     expect(closeWindow).toHaveBeenCalledTimes(1);
   });
+
+  it("makes About modal and restores the Help trigger after Escape", async () => {
+    const user = userEvent.setup();
+    render(<AboutNotepad closeWindow={vi.fn()} />);
+    const help = screen.getByRole("button", { name: "Help" });
+
+    await user.click(help);
+    await user.click(
+      screen.getByRole("menuitem", { name: "About This Portfolio" }),
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "About This Portfolio" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(
+      screen.getByRole("button", { name: "Close About This Portfolio" }),
+    ).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: "About This Portfolio" }),
+    ).not.toBeInTheDocument();
+    expect(help).toHaveFocus();
+  });
 });

@@ -194,7 +194,9 @@ export function ProjectsExplorer({
               <XpButton onClick={() => setWarningVisible(false)}>OK</XpButton>
             }
             className="projects-explorer__warning-dialog"
+            modal
             onClose={() => setWarningVisible(false)}
+            onDismiss={() => setWarningVisible(false)}
             title="Windows Explorer"
           >
             <div className="projects-explorer__warning-message">

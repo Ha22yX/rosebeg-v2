@@ -1,5 +1,8 @@
 import { AboutNotepad } from "@/apps/about/AboutNotepad";
-import { HarryMessenger } from "@/apps/messenger/HarryMessenger";
+import {
+  defaultMessengerStorageKey,
+  HarryMessenger,
+} from "@/apps/messenger/HarryMessenger";
 import { PicturesBrowser } from "@/apps/photos/PicturesBrowser";
 import { PictureViewer } from "@/apps/photos/PictureViewer";
 import { ProjectsExplorer } from "@/apps/projects/ProjectsExplorer";
@@ -55,6 +58,8 @@ export const appRegistry = {
     icon: "/assets/icons/messenger.png",
     idealSize: { width: 420, height: 560 },
     minimumSize: { width: 320, height: 360 },
-    render: () => <HarryMessenger />,
+    render: ({ windowId }) => (
+      <HarryMessenger storageKey={`${defaultMessengerStorageKey}:${windowId}`} />
+    ),
   },
 } satisfies WindowRegistry;

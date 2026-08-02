@@ -51,19 +51,19 @@ describe("fitInitialBounds", () => {
     expect(wrapped).toEqual({ x: 50, y: 40, width: 900, height: 620 });
   });
 
-  it("clamps the complete window rectangle inside the usable desktop", () => {
+  it("clamps normal windows inside the desktop's 12 px safe margin", () => {
     expect(
       clampBounds(
         { x: -40, y: 690, width: 900, height: 620 },
         { width: 1000, height: 700 },
       ),
-    ).toEqual({ x: 0, y: 80, width: 900, height: 620 });
+    ).toEqual({ x: 12, y: 68, width: 900, height: 620 });
     expect(
       clampBounds(
         { x: 0, y: 0, width: 900, height: 900 },
         { width: 390, height: 812 },
       ),
-    ).toEqual({ x: 0, y: 0, width: 390, height: 812 });
+    ).toEqual({ x: 12, y: 12, width: 366, height: 788 });
   });
 
   it("preserves ideal width when only desktop height is below minimum", () => {

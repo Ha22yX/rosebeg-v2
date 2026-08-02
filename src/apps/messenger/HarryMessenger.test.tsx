@@ -1,12 +1,14 @@
 import { StrictMode } from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { HarryMessenger } from "@/apps/messenger/HarryMessenger";
+import {
+  defaultMessengerStorageKey,
+  HarryMessenger,
+} from "@/apps/messenger/HarryMessenger";
 import type { ChatMessage, ChatService } from "@/apps/messenger/chat-service";
 import { LocalChatService } from "@/apps/messenger/local-chat-service";
 import { localChatCopy } from "@/content/chat-responses";
-
-const storageKey = "rosebeg-v2:messenger";
+import { appRegistry } from "@/desktop/app-registry";
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -101,7 +103,10 @@ describe("HarryMessenger", () => {
         status: "delivered",
       },
     ];
-    sessionStorage.setItem(storageKey, JSON.stringify(restored));
+    sessionStorage.setItem(
+      defaultMessengerStorageKey,
+      JSON.stringify(restored),
+    );
 
     render(<HarryMessenger />);
 
@@ -113,7 +118,7 @@ describe("HarryMessenger", () => {
   });
 
   it("ignores malformed session data and starts with the welcome", () => {
-    sessionStorage.setItem(storageKey, '{"not":"messages"}');
+    sessionStorage.setItem(defaultMessengerStorageKey, '{"not":"messages"}');
 
     expect(() => render(<HarryMessenger />)).not.toThrow();
     expect(screen.getByText(localChatCopy.welcome)).toBeInTheDocument();
@@ -191,8 +196,8 @@ describe("HarryMessenger", () => {
 
   it("keeps simultaneous Messenger instances isolated", async () => {
     const user = userEvent.setup();
-    const first = render(<HarryMessenger service={new LocalChatService()} />);
-    const second = render(<HarryMessenger service={new LocalChatService()} />);
+    const first = renderRegistryMessenger("harry-messenger-1");
+    const second = renderRegistryMessenger("harry-messenger-2");
 
     await user.type(
       within(first.container).getByRole("textbox", { name: "Message Harry" }),
@@ -204,4 +209,35 @@ describe("HarryMessenger", () => {
     expect(within(second.container).queryByText("projects")).not.toBeInTheDocument();
     expect(within(second.container).queryByText(localChatCopy.projects)).not.toBeInTheDocument();
   });
+
+  it("does not leak a completed transcript into a later registry window", async () => {
+    const user = userEvent.setup();
+    const first = renderRegistryMessenger("harry-messenger-1");
+
+    await user.type(
+      within(first.container).getByRole("textbox", { name: "Message Harry" }),
+      "projects{Enter}",
+    );
+    expect(
+      await within(first.container).findByText(localChatCopy.projects),
+    ).toBeInTheDocument();
+
+    const later = renderRegistryMessenger("harry-messenger-2");
+    expect(within(later.container).getByText(localChatCopy.welcome)).toBeInTheDocument();
+    expect(within(later.container).queryByText("projects")).not.toBeInTheDocument();
+    expect(
+      within(later.container).queryByText(localChatCopy.projects),
+    ).not.toBeInTheDocument();
+  });
 });
+
+function renderRegistryMessenger(windowId: string) {
+  const messenger = appRegistry["harry-messenger"]!.render({
+    windowId,
+    payload: {},
+    close: vi.fn(),
+    launch: vi.fn(() => "unused-window"),
+  });
+
+  return render(<>{messenger}</>);
+}
