@@ -89,6 +89,8 @@ export function HarryMessenger({ service }: HarryMessengerProps) {
   const transcriptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     return () => {
       isMountedRef.current = false;
     };
@@ -160,85 +162,95 @@ export function HarryMessenger({ service }: HarryMessengerProps) {
   };
 
   return (
-    <section aria-label="Harry Messenger" className="harry-messenger">
-      <aside aria-label="Contacts" className="harry-messenger__contacts">
-        <div className="harry-messenger__contacts-title">Contacts</div>
-        <button
-          aria-pressed="true"
-          className="harry-messenger__contact"
-          type="button"
-          aria-label={`Harry, ${isOnline ? "online" : "offline"}`}
-        >
-          <span aria-hidden="true" className="harry-messenger__avatar">H</span>
-          <span className="harry-messenger__contact-copy">
-            <strong>Harry</strong>
-            <small>{isOnline ? "Online" : "Offline"}</small>
-          </span>
-        </button>
-      </aside>
+    <section
+      aria-label="Harry Messenger"
+      className="harry-messenger"
+      style={{ containerName: "harry-messenger", containerType: "size" }}
+    >
+      <div className="harry-messenger__layout">
+        <aside aria-label="Contacts" className="harry-messenger__contacts">
+          <div className="harry-messenger__contacts-title">Contacts</div>
+          <button
+            aria-pressed="true"
+            className="harry-messenger__contact"
+            type="button"
+            aria-label={`Harry, ${isOnline ? "online" : "offline"}`}
+          >
+            <span aria-hidden="true" className="harry-messenger__avatar">H</span>
+            <span className="harry-messenger__contact-copy">
+              <strong>Harry</strong>
+              <small>{isOnline ? "Online" : "Offline"}</small>
+            </span>
+          </button>
+        </aside>
 
-      <div className="harry-messenger__conversation">
-        <header className="harry-messenger__header">
-          <span aria-hidden="true" className="harry-messenger__avatar harry-messenger__avatar--large">H</span>
-          <div>
-            <h2>Harry</h2>
-            <p>{isOnline ? "Online — local portfolio replies" : "Offline — message not delivered"}</p>
-          </div>
-        </header>
-
-        <div
-          aria-label="Conversation with Harry"
-          aria-live="polite"
-          className="harry-messenger__transcript"
-          ref={transcriptRef}
-          role="log"
-        >
-          {messages.map((message) => (
-            <article
-              className={`harry-messenger__message harry-messenger__message--${message.sender}`}
-              key={message.id}
-            >
-              <div className="harry-messenger__message-meta">
-                <strong>{message.sender === "harry" ? "Harry" : "You"}</strong>
-                <time dateTime={message.createdAt}>{formatTime(message.createdAt)}</time>
-              </div>
-              <p data-sender={message.sender} data-status={message.status}>{message.text}</p>
-              <small className={`harry-messenger__delivery harry-messenger__delivery--${message.status}`}>
-                {message.status === "error"
-                  ? "Not delivered"
-                  : message.status === "delivered"
-                    ? "Delivered"
-                    : "Sent"}
-              </small>
-            </article>
-          ))}
-
-          {isPending ? (
-            <div
-              aria-label="Harry is typing"
-              className="harry-messenger__typing"
-              role="status"
-            >
-              Harry is typing...
+        <div className="harry-messenger__conversation">
+          <header className="harry-messenger__header">
+            <span aria-hidden="true" className="harry-messenger__avatar harry-messenger__avatar--large">H</span>
+            <div>
+              <h2>Harry</h2>
+              <p>{isOnline ? "Online — local portfolio replies" : "Offline — message not delivered"}</p>
             </div>
-          ) : null}
-        </div>
+          </header>
 
-        <form aria-label="Message composer" className="harry-messenger__composer" onSubmit={handleSubmit}>
-          <label htmlFor={composerId}>Message Harry</label>
-          <div className="harry-messenger__composer-row">
-            <textarea
-              id={composerId}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={handleComposerKeyDown}
-              placeholder="Type a message..."
-              rows={3}
-              value={draft}
-            />
-            <XpButton disabled={!draft.trim() || isPending} type="submit">Send</XpButton>
+          <div
+            aria-label="Conversation with Harry"
+            aria-live="polite"
+            className="harry-messenger__transcript"
+            ref={transcriptRef}
+            role="log"
+          >
+            {messages.map((message) => (
+              <article
+                className={`harry-messenger__message harry-messenger__message--${message.sender}`}
+                key={message.id}
+              >
+                <div className="harry-messenger__message-meta">
+                  <strong>{message.sender === "harry" ? "Harry" : "You"}</strong>
+                  <time dateTime={message.createdAt}>{formatTime(message.createdAt)}</time>
+                </div>
+                <p data-sender={message.sender} data-status={message.status}>{message.text}</p>
+                <small className={`harry-messenger__delivery harry-messenger__delivery--${message.status}`}>
+                  {message.status === "error"
+                    ? "Not delivered"
+                    : message.status === "delivered"
+                      ? "Delivered"
+                      : "Sent"}
+                </small>
+              </article>
+            ))}
+
+            {isPending ? (
+              <div
+                aria-label="Harry is typing"
+                className="harry-messenger__typing"
+                role="status"
+              >
+                Harry is typing...
+              </div>
+            ) : null}
           </div>
-          <p>Press Enter to send. Press Shift+Enter for a new line.</p>
-        </form>
+
+          <form
+            aria-label="Message composer"
+            className="harry-messenger__composer"
+            onSubmit={handleSubmit}
+          >
+            <label htmlFor={composerId}>Message Harry</label>
+            <div className="harry-messenger__composer-row">
+              <textarea
+                id={composerId}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={handleComposerKeyDown}
+                placeholder="Type a message..."
+                rows={3}
+                value={draft}
+              />
+              <XpButton disabled={!draft.trim() || isPending} type="submit">Send</XpButton>
+            </div>
+            <p>Press Enter to send. Press Shift+Enter for a new line.</p>
+          </form>
+        </div>
       </div>
     </section>
   );

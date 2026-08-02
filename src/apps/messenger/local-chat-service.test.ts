@@ -20,6 +20,15 @@ describe("LocalChatService", () => {
     await expect(service.send(message, [])).resolves.toEqual({ intent, text });
   });
 
+  it.each([
+    ["Tell me about SAT AI Tutor", "projects", localChatCopy.projects],
+    ["What AI projects have you built?", "projects", localChatCopy.projects],
+    ["Is the AI API connected?", "ai-status", localChatCopy.aiNotConnected],
+    ["Is this portfolio connected to AI?", "ai-status", localChatCopy.aiNotConnected],
+  ] as const)("prioritizes project context in %s", async (message, intent, text) => {
+    await expect(service.send(message, [])).resolves.toEqual({ intent, text });
+  });
+
   it("uses the honest offline fallback", async () => {
     await expect(service.send("unmatched sentence", [])).resolves.toEqual({
       intent: "fallback",

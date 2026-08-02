@@ -1,13 +1,23 @@
 .harry-messenger {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  container-name: harry-messenger;
+  container-type: size;
+  color: #111;
+  background: #ece9d8;
+  font: 11px Tahoma, "Segoe UI", sans-serif;
+}
+
+.harry-messenger__layout {
   display: grid;
+  width: 100%;
   min-width: 0;
   min-height: 0;
   height: 100%;
   grid-template-columns: minmax(112px, 30%) minmax(0, 1fr);
   overflow: hidden;
-  color: #111;
-  background: #ece9d8;
-  font: 11px Tahoma, "Segoe UI", sans-serif;
 }
 
 .harry-messenger__contacts {
@@ -242,8 +252,8 @@
   color: #606060;
 }
 
-@container (max-width: 340px) {
-  .harry-messenger {
+@container harry-messenger (max-width: 340px) {
+  .harry-messenger__layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
   }
@@ -271,7 +281,7 @@
   }
 }
 
-@container (max-height: 330px) {
+@container harry-messenger (max-height: 330px) {
   .harry-messenger__contacts {
     padding-block: 3px;
   }

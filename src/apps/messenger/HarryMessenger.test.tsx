@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HarryMessenger } from "@/apps/messenger/HarryMessenger";
@@ -23,6 +24,17 @@ describe("HarryMessenger", () => {
     expect(screen.getByText(localChatCopy.welcome)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Message Harry" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+  });
+
+  it("establishes a size query container for constrained layouts", () => {
+    const { container } = render(<HarryMessenger />);
+
+    const messenger = screen.getByRole("region", { name: "Harry Messenger" });
+    expect(messenger.style.getPropertyValue("container-type")).toBe("size");
+    expect(messenger.style.getPropertyValue("container-name")).toBe("harry-messenger");
+
+    const layout = container.querySelector(".harry-messenger__layout");
+    expect(layout).not.toBeNull();
   });
 
   it("keeps Send disabled for whitespace and submits visitor and Harry bubbles", async () => {
@@ -133,6 +145,31 @@ describe("HarryMessenger", () => {
 
     resolveReply?.({ intent: "fallback", text: "Injected reply" });
     expect(await screen.findByText("Injected reply")).toBeInTheDocument();
+  });
+
+  it("completes a deferred service reply after StrictMode replays effects", async () => {
+    const user = userEvent.setup();
+    let resolveReply: ((value: { intent: "fallback"; text: string }) => void) | undefined;
+    const service: ChatService = {
+      send: () =>
+        new Promise((resolve) => {
+          resolveReply = resolve;
+        }),
+    };
+    render(
+      <StrictMode>
+        <HarryMessenger service={service} />
+      </StrictMode>,
+    );
+
+    await user.type(screen.getByRole("textbox", { name: "Message Harry" }), "hello{Enter}");
+    expect(screen.getByRole("status", { name: "Harry is typing" })).toBeInTheDocument();
+
+    resolveReply?.({ intent: "fallback", text: "StrictMode reply" });
+
+    expect(await screen.findByText("StrictMode reply")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Harry is typing" })).not.toBeInTheDocument();
+    expect(screen.getByText("hello")).toHaveAttribute("data-status", "delivered");
   });
 
   it("marks only the failed visitor message and retains earlier messages when the service rejects", async () => {

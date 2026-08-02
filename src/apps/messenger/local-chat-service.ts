@@ -9,8 +9,11 @@ import { projects } from "@/content/projects";
 
 type LocalIntent = Exclude<ChatReply["intent"], "fallback">;
 
+const aiSubjectKeywords = ["ai", "artificial intelligence", "chatbot"] as const;
+const aiStatusKeywords = ["api", "connected", "connection", "online", "service", "status"] as const;
+
 const intentKeywords: Readonly<Record<LocalIntent, readonly string[]>> = {
-  "ai-status": ["ai", "artificial intelligence", "chatbot", "connected", "online"],
+  "ai-status": [...aiSubjectKeywords, "connected", "online"],
   projects: [
     "project",
     "projects",
@@ -39,8 +42,8 @@ const responseText: Readonly<Record<LocalIntent, string>> = {
 };
 
 const intentOrder: readonly LocalIntent[] = [
-  "ai-status",
   "projects",
+  "ai-status",
   "photography",
   "contact",
 ];
@@ -57,6 +60,13 @@ export class LocalChatService implements ChatService {
   async send(message: string, _history: readonly ChatMessage[]): Promise<ChatReply> {
     const normalizedMessage = message.toLocaleLowerCase().trim();
     if (!normalizedMessage) throw new Error("Message is empty");
+
+    const isAiStatusQuestion =
+      aiSubjectKeywords.some((keyword) => containsKeyword(normalizedMessage, keyword)) &&
+      aiStatusKeywords.some((keyword) => containsKeyword(normalizedMessage, keyword));
+    if (isAiStatusQuestion) {
+      return { intent: "ai-status", text: localChatCopy.aiNotConnected };
+    }
 
     const intent = intentOrder.find((candidate) =>
       intentKeywords[candidate].some((keyword) => containsKeyword(normalizedMessage, keyword)),
