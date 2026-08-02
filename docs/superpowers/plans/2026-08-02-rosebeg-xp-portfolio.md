@@ -19,7 +19,9 @@
 - A hard load starts at boot; Log Off returns to login; Turn Off reaches powered-off; Restart replays boot.
 - The first Messenger release is local and explicit about AI not being connected; never ship an API key or secret.
 - Do not call the GitHub API at runtime. Project and contact content is static and source-controlled.
+- Keep all user-facing website copy in English.
 - Support keyboard operation and `prefers-reduced-motion` without removing functional states.
+- Task 1 configuration/scaffolding files and Task 9 generated bitmap assets are approved TDD exceptions. Validate configuration through install, type-check, test, and build commands, and validate bitmap assets through native-size visual inspection. All runtime behavior still follows strict red-green-refactor.
 - Use `npm.cmd` rather than `npm` in PowerShell commands because the local execution policy blocks `npm.ps1`.
 - Keep the Git default branch as `main`; publish only after every verification command passes.
 - Final remote is the public repository `Ha22yX/rosebeg-v2`.
@@ -1604,7 +1606,6 @@ git commit -m "test: cover XP desktop end to end"
 
 **Files:**
 - Create: `README.md`
-- Create: `tests/readme.test.ts`
 - Create: `docs/screenshots/desktop.png`
 - Create: `docs/screenshots/projects.png`
 - Create: `docs/screenshots/photos.png`
@@ -1616,42 +1617,13 @@ git commit -m "test: cover XP desktop end to end"
 - Consumes: Fully verified build and visual output from Task 11.
 - Produces: public onboarding documentation, clean Git history, and `https://github.com/Ha22yX/rosebeg-v2`.
 
-- [ ] **Step 1: Write and run a failing README contract test**
+- [ ] **Step 1: Capture final screenshots and write README**
 
-```ts
-import { readFileSync } from "node:fs";
+Copy inspected Playwright outputs into the four named `docs/screenshots` files. Write a concise English README with a centered project title, desktop hero screenshot, feature overview, controls for pointer, touch, and keyboard use, technology, V1 content provenance, local chat-adapter status, local development commands, test matrix, repository structure, the V1 website link, and public contact links. Do not claim production deployment.
 
-describe("README", () => {
-  it("documents the product, controls, provenance, and verification commands", () => {
-    const readme = readFileSync("README.md", "utf8");
-    for (const phrase of [
-      "My Projects",
-      "My Pictures",
-      "About Harry",
-      "Harry Messenger",
-      "double-click",
-      "single tap",
-      "local chat adapter",
-      "https://harry.rosebeg.com/",
-      "https://github.com/Ha22yX",
-      "npm.cmd install",
-      "npm.cmd run dev",
-      "npm.cmd test",
-      "npm.cmd run check",
-      "npm.cmd run build",
-      "npm.cmd run test:e2e",
-    ]) {
-      expect(readme).toContain(phrase);
-    }
-  });
-});
-```
+- [ ] **Step 2: Manually verify the README**
 
-Run `npm.cmd test -- --run tests/readme.test.ts`. Expected: FAIL because `README.md` does not exist.
-
-- [ ] **Step 2: Capture final screenshots and write README**
-
-Copy inspected Playwright outputs into the four named `docs/screenshots` files. Write a concise README with centered project title, desktop hero screenshot, feature overview, controls, technology, content provenance, local development, test matrix, repository structure, and public contact links. Do not claim production deployment. Run `npm.cmd test -- --run tests/readme.test.ts`; expected result is PASS.
+Render the Markdown and verify that every screenshot loads, every internal anchor works, public links resolve to the intended destinations, and install, development, test, type-check, build, end-to-end, and visual-test commands are documented accurately. Human-facing prose is accepted through this checklist rather than a brittle exact-phrase test.
 
 - [ ] **Step 3: Run a repository safety audit**
 
@@ -1688,20 +1660,19 @@ git commit -m "docs: prepare Rosebeg XP portfolio release"
 git status --short --branch
 ```
 
-Expected: branch is `main` and the worktree is clean.
+Expected: the implementation branch is clean. Publication waits until the task-by-task review and final whole-branch review are complete.
 
-- [ ] **Step 6: Verify GitHub destination safety**
+---
 
-Run:
+## Post-Implementation Release Procedure
 
-```powershell
-gh auth status
-gh repo view Ha22yX/rosebeg-v2
-```
+After all task reviews and the final whole-branch review are clean, use `superpowers:finishing-a-development-branch` to integrate the implementation branch into local `main` and re-run the required verification on the integrated result.
 
-Expected: authentication reports active account `Ha22yX`. If the repository does not exist, proceed. If it already exists, stop and inspect its ownership and remote state instead of overwriting it.
+- [ ] **Step 1: Verify GitHub destination safety from the primary `main` worktree**
 
-- [ ] **Step 7: Create and push the public repository**
+Run `gh auth status` and `gh repo view Ha22yX/rosebeg-v2`. Authentication must report active account `Ha22yX`. If the repository does not exist, proceed. If it already exists, inspect its ownership and remote state instead of overwriting it.
+
+- [ ] **Step 2: Create and push the public repository**
 
 When the destination is confirmed absent, run:
 
@@ -1720,6 +1691,6 @@ Expected: `nameWithOwner` is `Ha22yX/rosebeg-v2`, `isPrivate` is `false`, defaul
 
 - Every design-spec section maps to a task: content (Task 2), system phases (Task 3), windows (Task 4), projects (Task 5), photos (Task 6), Notepad (Task 7), Messenger (Task 8), XP shell (Task 9), accessibility/error handling (Task 10), automated and visual verification (Task 11), Git/publication (Task 12).
 - Public type names are stable across tasks: `AppId`, `WindowPayload`, `WindowDefinition`, `WindowInstance`, `WindowManagerApi`, `Project`, `PhotoItem`, `ContactChannel`, `ChatService`, and `SystemActions`.
-- Every feature task follows a failing-test, implementation, verification, and commit cycle.
+- Every runtime feature task follows a failing-test, implementation, verification, and commit cycle; only the approved configuration and generated-bitmap exceptions bypass the initial failing test.
 - No runtime request depends on V1, GitHub API, or a third-party image host.
-- The plan never creates or pushes the GitHub repository before fresh final verification passes.
+- The plan never creates or pushes the GitHub repository before task reviews, final whole-branch review, integration to `main`, and fresh final verification pass.
