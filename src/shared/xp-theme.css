@@ -98,3 +98,105 @@
   gap: 8px;
   padding: 0 14px 12px;
 }
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--xp-focus);
+  outline-offset: 2px;
+}
+
+.app-error-boundary {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: clamp(18px, 5cqi, 34px);
+  color: var(--xp-text);
+  background: var(--xp-surface);
+}
+
+.app-error-boundary__icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: #d93624;
+  box-shadow: 0 0 0 1px #7c1a10;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-error-boundary__copy {
+  min-width: 0;
+}
+
+.app-error-boundary h3,
+.app-error-boundary p {
+  margin: 0;
+}
+
+.app-error-boundary h3 {
+  font-size: 13px;
+}
+
+.app-error-boundary p {
+  margin-top: 5px;
+  line-height: 1.45;
+}
+
+.app-error-boundary .xp-button {
+  min-width: 78px;
+  grid-column: 2;
+  justify-self: end;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --xp-blue-dark: Highlight;
+    --xp-blue: Highlight;
+    --xp-blue-light: Highlight;
+    --xp-surface: Canvas;
+    --xp-border-light: ButtonText;
+    --xp-border-mid: ButtonText;
+    --xp-border-dark: ButtonText;
+    --xp-text: CanvasText;
+    --xp-focus: Highlight;
+  }
+
+  .xp-button,
+  .xp-dialog,
+  .app-error-boundary {
+    border-color: ButtonText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+
+  .xp-dialog__title-bar {
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .app-error-boundary__icon {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+}

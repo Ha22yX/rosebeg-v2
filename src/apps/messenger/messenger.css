@@ -3,6 +3,7 @@
   min-height: 0;
   height: 100%;
   overflow: hidden;
+  isolation: isolate;
   container-name: harry-messenger;
   container-type: size;
   color: #111;
@@ -101,6 +102,7 @@
   display: flex;
   min-width: 0;
   min-height: 0;
+  height: 100%;
   flex-direction: column;
   overflow: hidden;
   background: #fff;
@@ -209,6 +211,8 @@
 }
 
 .harry-messenger__composer {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   flex: 0 0 auto;
   padding: 7px 8px 6px;
@@ -279,6 +283,10 @@
   .harry-messenger__composer {
     padding: 5px;
   }
+
+  .harry-messenger__composer-row {
+    gap: 4px;
+  }
 }
 
 @container harry-messenger (max-height: 330px) {
@@ -304,6 +312,20 @@
   .harry-messenger__contact[aria-pressed="true"],
   .harry-messenger__message > p,
   .harry-messenger__typing {
-    forced-color-adjust: none;
+    forced-color-adjust: auto;
+  }
+
+  .harry-messenger__contacts,
+  .harry-messenger__header,
+  .harry-messenger__composer,
+  .harry-messenger__conversation {
+    border-color: ButtonText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  .harry-messenger__contact[aria-pressed="true"] {
+    color: HighlightText;
+    background: Highlight;
   }
 }

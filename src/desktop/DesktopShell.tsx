@@ -76,6 +76,7 @@ export function DesktopShell() {
         onPointerDown={() => {
           if (startOpen) dismissStart();
         }}
+        role="group"
       >
         <div className="desktop-icons">
           {desktopEntries.map((entry) => (

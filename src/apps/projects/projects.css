@@ -221,6 +221,7 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   flex: 1;
   background: #fff;
 }
@@ -685,6 +686,8 @@ a.projects-explorer__file:hover {
 @container (max-width: 620px) {
   .projects-explorer__toolbar {
     min-height: 34px;
+    gap: 0;
+    padding-inline: 3px;
   }
 
   .projects-explorer__toolbar-button {
@@ -698,6 +701,15 @@ a.projects-explorer__file:hover {
     width: 18px;
     height: 18px;
     font-size: 17px;
+  }
+
+  .projects-explorer__separator {
+    margin-inline: 2px;
+  }
+
+  .projects-explorer__address-row {
+    grid-template-columns: auto 20px minmax(0, 1fr) 22px;
+    padding-inline: 3px;
   }
 
   .projects-explorer__task-pane {
@@ -787,6 +799,17 @@ a.projects-explorer__file:hover {
   .projects-explorer__folder:focus-visible,
   .projects-explorer__shortcut,
   .projects-explorer__warning-icon {
-    forced-color-adjust: none;
+    forced-color-adjust: auto;
+  }
+
+  .projects-explorer__toolbar,
+  .projects-explorer__address-row,
+  .projects-explorer__status,
+  .projects-explorer__task-pane,
+  .projects-explorer__task-group {
+    border-color: ButtonText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

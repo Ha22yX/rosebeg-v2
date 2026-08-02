@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   WindowManagerProvider,
@@ -47,6 +47,56 @@ const registry: WindowRegistry = {
 };
 
 describe("WindowManagerProvider", () => {
+  it("contains a registry app crash to its window and keeps sibling windows usable", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const crashRegistry: WindowRegistry = {
+      "projects-explorer": {
+        ...registry["projects-explorer"]!,
+        title: "Broken",
+        render: () => {
+          throw new Error("broken app");
+        },
+      },
+      "pictures-browser": {
+        appId: "pictures-browser",
+        title: "Healthy",
+        icon: "/assets/icons/pictures.png",
+        idealSize: { width: 600, height: 480 },
+        minimumSize: { width: 320, height: 240 },
+        render: () => <button type="button">Healthy action</button>,
+      },
+    };
+
+    render(
+      <WindowManagerProvider
+        desktopSize={{ width: 1000, height: 700 }}
+        registry={crashRegistry}
+      >
+        <CrashHarness />
+      </WindowManagerProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Launch healthy" }));
+    await user.click(screen.getByRole("button", { name: "Launch broken" }));
+
+    const errorDialog = screen.getByRole("alertdialog", {
+      name: "Broken has encountered a problem",
+    });
+    expect(screen.getByRole("button", { name: "Healthy action" })).toBeEnabled();
+
+    await user.click(
+      within(errorDialog).getByRole("button", { name: "Close Broken" }),
+    );
+    expect(
+      screen.queryByRole("alertdialog", {
+        name: "Broken has encountered a problem",
+      }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Healthy action" })).toBeEnabled();
+  });
+
   it("launches independent frames and restores a minimized frame from its task action", async () => {
     const user = userEvent.setup();
     renderManager();
@@ -289,6 +339,21 @@ function ManagerHarness() {
           {windowInstance.title}
         </button>
       ))}
+    </>
+  );
+}
+
+function CrashHarness() {
+  const manager = useWindowManager();
+
+  return (
+    <>
+      <button onClick={() => manager.launch("pictures-browser")} type="button">
+        Launch healthy
+      </button>
+      <button onClick={() => manager.launch("projects-explorer")} type="button">
+        Launch broken
+      </button>
     </>
   );
 }

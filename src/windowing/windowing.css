@@ -2,6 +2,8 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  isolation: isolate;
+  overscroll-behavior: none;
   pointer-events: none;
 }
 
@@ -13,7 +15,7 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 3px solid #7a96df;
+  border: 3px solid #51699f;
   border-radius: 7px 7px 2px 2px;
   color: var(--xp-text);
   background: var(--xp-surface);
@@ -31,8 +33,8 @@
   align-items: center;
   gap: 4px;
   padding: 1px 2px 1px 4px;
-  color: #e7e7e7;
-  background: linear-gradient(90deg, #7697dc, #9db9eb);
+  color: #fff;
+  background: linear-gradient(90deg, #4965a2, #5875ad);
   touch-action: none;
   user-select: none;
 }
@@ -94,6 +96,7 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   flex: 1;
   background: #fff;
 }
@@ -172,4 +175,48 @@
 .xp-window__resize--northwest {
   top: 0;
   left: 0;
+}
+
+@media (max-width: 620px) {
+  .xp-window {
+    border-width: 2px;
+    border-radius: 5px 5px 1px 1px;
+  }
+
+  .xp-window__title-bar {
+    gap: 3px;
+    padding-left: 3px;
+  }
+
+  .xp-window__control {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    min-height: 22px;
+  }
+}
+
+@media (forced-colors: active) {
+  .xp-window {
+    border-color: ButtonText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+
+  .xp-window__title-bar {
+    color: ButtonText;
+    background: ButtonFace;
+    text-shadow: none;
+  }
+
+  .xp-window.is-active {
+    border-color: Highlight;
+  }
+
+  .xp-window.is-active .xp-window__title-bar {
+    color: HighlightText;
+    background: Highlight;
+  }
 }

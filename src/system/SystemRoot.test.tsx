@@ -16,6 +16,34 @@ describe("SystemRoot", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses short phase timing when the operating system requests reduced motion", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({
+        matches: true,
+        media: "(prefers-reduced-motion: reduce)",
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      } satisfies MediaQueryList),
+    );
+
+    render(
+      <SystemRoot>
+        <div>Desktop child</div>
+      </SystemRoot>,
+    );
+
+    act(() => vi.advanceTimersByTime(149));
+    expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("login-screen")).toBeInTheDocument();
   });
 
   it("shows the desktop after booting and signing in with Harry", () => {

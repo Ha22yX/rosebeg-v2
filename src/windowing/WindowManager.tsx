@@ -8,6 +8,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
+import { AppErrorBoundary } from "@/shared/AppErrorBoundary";
 import { WindowFrame } from "@/windowing/WindowFrame";
 import {
   initialWindowState,
@@ -16,9 +17,11 @@ import {
 import type {
   AppId,
   DesktopSize,
+  WindowAppContext,
   WindowInstance,
   WindowPayload,
   WindowRegistry,
+  WindowRegistryEntry,
 } from "@/windowing/types";
 import "@/windowing/windowing.css";
 
@@ -169,16 +172,34 @@ export function WindowManagerProvider({
               onRestore={() => restore(windowInstance.id)}
               windowInstance={windowInstance}
             >
-              {entry.render({
-                windowId: windowInstance.id,
-                payload: windowInstance.payload,
-                close: () => close(windowInstance.id),
-                launch,
-              })}
+              <AppErrorBoundary
+                onClose={() => close(windowInstance.id)}
+                windowTitle={windowInstance.title}
+              >
+                <RegistryApplication
+                  context={{
+                    windowId: windowInstance.id,
+                    payload: windowInstance.payload,
+                    close: () => close(windowInstance.id),
+                    launch,
+                  }}
+                  entry={entry}
+                />
+              </AppErrorBoundary>
             </WindowFrame>
           );
         })}
       </div>
     </WindowManagerContext.Provider>
   );
+}
+
+function RegistryApplication({
+  context,
+  entry,
+}: {
+  context: WindowAppContext;
+  entry: WindowRegistryEntry;
+}) {
+  return entry.render(context);
 }

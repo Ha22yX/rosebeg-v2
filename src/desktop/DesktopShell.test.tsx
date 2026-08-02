@@ -1,5 +1,6 @@
 import { act } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "@/app/App";
 
@@ -51,6 +52,12 @@ describe("DesktopShell", () => {
     expect(
       screen.getAllByRole("button", { name: /My Projects task/i }),
     ).toHaveLength(2);
+  });
+
+  it("exposes the desktop icon area as a named control group", () => {
+    renderDesktop();
+
+    expect(screen.getByRole("group", { name: "Desktop" })).toBeInTheDocument();
   });
 
   it("dismisses Start with Escape, a desktop click, a Start re-click, or an app launch", () => {
@@ -129,15 +136,61 @@ describe("DesktopShell", () => {
 
     fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
 
-    expect(screen.getByRole("dialog", { name: "My Projects" })).toHaveStyle({
+    const explorerWindow = screen.getByRole("dialog", { name: "My Projects" });
+    expect(explorerWindow).toHaveStyle({
       left: "12px",
       top: "12px",
       width: "366px",
       height: "788px",
     });
+    expect(explorerWindow).toHaveAttribute("data-window-mode", "normal");
     expect(
       screen.getByRole("button", { name: "Maximize My Projects" }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps Explorer at its ideal size on a 1920 by 1080 desktop", () => {
+    Object.defineProperty(window, "innerWidth", { value: 1920 });
+    Object.defineProperty(window, "innerHeight", { value: 1080 });
+    renderDesktop();
+
+    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+
+    expect(screen.getByRole("dialog", { name: "My Projects" })).toHaveStyle({
+      width: "900px",
+      height: "620px",
+    });
+    expect(
+      screen.getByRole("button", { name: "Maximize My Projects" }),
+    ).toBeInTheDocument();
+  });
+
+  it("tabs through named desktop, window, and Explorer controls in DOM order", async () => {
+    renderDesktop();
+    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    vi.useRealTimers();
+    const user = userEvent.setup();
+
+    const expectedNames = [
+      "My Projects",
+      "My Pictures",
+      "About Harry",
+      "Harry Messenger",
+      "Start",
+      "Open applications",
+      "My Projects task 1",
+      "Minimize My Projects",
+      "Maximize My Projects",
+      "Close My Projects",
+      "Search",
+      "Folders",
+      "Views",
+    ];
+
+    for (const accessibleName of expectedNames) {
+      await user.tab();
+      expect(document.activeElement).toHaveAccessibleName(accessibleName);
+    }
   });
 
   it("keeps every narrow-screen task reachable with task-strip keyboard navigation", () => {

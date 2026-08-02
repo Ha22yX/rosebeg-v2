@@ -5,6 +5,8 @@
   min-height: 0;
   height: 100%;
   flex-direction: column;
+  overflow: hidden;
+  container-type: size;
   color: #111;
   background: #ece9d8;
   font: 11px Tahoma, "Segoe UI", sans-serif;
@@ -23,6 +25,7 @@
 
 .about-notepad__menu-group {
   position: relative;
+  flex: 0 0 auto;
 }
 
 .about-notepad__menu-trigger,
@@ -58,10 +61,18 @@
   left: 0;
   display: grid;
   min-width: 154px;
+  max-width: calc(100cqw - 6px);
+  max-height: calc(100cqh - 30px);
+  overflow: auto;
   padding: 2px;
   border: 1px solid #767676;
   background: #f6f5ee;
   box-shadow: 2px 3px 5px rgb(0 0 0 / 28%);
+}
+
+.about-notepad__menu-group:last-child .about-notepad__menu {
+  right: 0;
+  left: auto;
 }
 
 .about-notepad__menu-item {
@@ -105,6 +116,7 @@
   min-height: 0;
   flex: 1;
   overflow: auto;
+  overscroll-behavior: contain;
   background: #fff;
 }
 
@@ -194,6 +206,10 @@
 }
 
 @container (max-width: 360px) {
+  .about-notepad__menu-bar {
+    align-content: start;
+  }
+
   .about-notepad__menu-trigger {
     padding-inline: 6px;
   }
@@ -208,6 +224,17 @@
   .about-notepad__menu-trigger[aria-expanded="true"],
   .about-notepad__menu-item:hover:not(:disabled),
   .about-notepad__menu-item:focus-visible:not(:disabled) {
-    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: auto;
+  }
+
+  .about-notepad__menu-bar,
+  .about-notepad__menu,
+  .about-notepad__status {
+    border-color: ButtonText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

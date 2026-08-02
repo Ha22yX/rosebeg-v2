@@ -165,6 +165,7 @@ export function WindowFrame({
     <section
       aria-labelledby={titleId}
       className={`xp-window xp-window--${mode}${active ? " is-active" : ""}`}
+      data-window-mode={mode}
       onPointerDownCapture={onFocus}
       role="dialog"
       style={style}

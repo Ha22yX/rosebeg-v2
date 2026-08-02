@@ -10,6 +10,7 @@ import {
 import { BootScreen } from "@/system/BootScreen";
 import { LoginScreen } from "@/system/LoginScreen";
 import { PowerScreen } from "@/system/PowerScreen";
+import { usePrefersReducedMotion } from "@/shared/usePrefersReducedMotion";
 import { initialSystemState, systemReducer } from "@/system/system-reducer";
 import "@/system/system.css";
 
@@ -36,9 +37,11 @@ type SystemRootProps = {
   reducedMotion?: boolean;
 };
 
-export function SystemRoot({ children, reducedMotion = false }: SystemRootProps) {
+export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
   const [state, dispatch] = useReducer(systemReducer, initialSystemState);
-  const transitionDelay = reducedMotion ? 150 : 650;
+  const systemPrefersReducedMotion = usePrefersReducedMotion();
+  const transitionDelay =
+    (reducedMotion ?? systemPrefersReducedMotion) ? 150 : 650;
 
   useEffect(() => {
     const eventByPhase = {
