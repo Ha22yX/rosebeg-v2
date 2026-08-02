@@ -79,6 +79,21 @@ describe("AboutNotepad", () => {
     expect(format).toHaveFocus();
   });
 
+  it("returns focus to the open menu trigger when root-level Escape dismisses it", async () => {
+    const user = userEvent.setup();
+    render(<AboutNotepad closeWindow={vi.fn()} />);
+
+    const edit = screen.getByRole("button", { name: "Edit" });
+    await user.click(edit);
+    expect(screen.getByRole("menu", { name: "Edit" })).toBeInTheDocument();
+
+    screen.getByRole("button", { name: "Format" }).focus();
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("menu", { name: "Edit" })).not.toBeInTheDocument();
+    expect(edit).toHaveFocus();
+  });
+
   it("keeps executable Markdown schemes and raw HTML inert", () => {
     const { container } = render(
       <MarkdownDocument

@@ -81,7 +81,7 @@ export function AboutNotepad({ closeWindow }: AboutNotepadProps) {
       onKeyDown={(event) => {
         if (event.key === "Escape" && openMenu) {
           event.preventDefault();
-          setOpenMenu(null);
+          closeMenu(openMenu);
         }
       }}
     >
