@@ -1,4 +1,5 @@
 import { useEffect, useState, type KeyboardEvent, type RefObject } from "react";
+import { useSystemSound } from "@/audio/SystemSoundProvider";
 import { XpIcon } from "@/shared/XpIcon";
 import { useWindowManager } from "@/windowing/WindowManager";
 
@@ -10,6 +11,7 @@ type TaskbarProps = {
 
 export function Taskbar({ startButtonRef, startOpen, onToggleStart }: TaskbarProps) {
   const { activeWindowId, toggleTaskbar, windows } = useWindowManager();
+  const { muted, toggleMuted } = useSystemSound();
   const clock = useMinuteClock();
 
   const navigateTasks = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -83,6 +85,16 @@ export function Taskbar({ startButtonRef, startOpen, onToggleStart }: TaskbarPro
 
       <aside aria-label="Notification area" className="taskbar__tray">
         <span aria-hidden="true" className="taskbar__tray-status" title="Portfolio is ready" />
+        <button
+          aria-label={muted ? "Enable system sounds" : "Mute system sounds"}
+          aria-pressed={muted}
+          className={`taskbar__sound${muted ? " is-muted" : ""}`}
+          onClick={toggleMuted}
+          title={muted ? "System sounds are muted" : "Mute system sounds"}
+          type="button"
+        >
+          <span aria-hidden="true" />
+        </button>
         <time aria-label={`Local time ${clock}`} dateTime={new Date().toISOString()}>
           {clock}
         </time>

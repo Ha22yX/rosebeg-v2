@@ -6,13 +6,20 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
+import { useSystemSound } from "@/audio/SystemSoundProvider";
+import {
+  readDesktopSession,
+  writeDesktopSession,
+} from "@/persistence/desktop-session";
 import { AppErrorBoundary } from "@/shared/AppErrorBoundary";
 import { WindowFrame } from "@/windowing/WindowFrame";
 import {
   initialWindowState,
   windowReducer,
+  type WindowState,
 } from "@/windowing/window-reducer";
 import type {
   AppId,
@@ -63,15 +70,29 @@ export function WindowManagerProvider({
   desktopSize,
   registry,
 }: WindowManagerProviderProps) {
-  const [state, dispatch] = useReducer(windowReducer, {
-    ...initialWindowState,
-    desktopSize,
-  });
-  const nextWindowNumber = useRef(0);
+  const [initialState] = useState(() => restoreWindowState(desktopSize, registry));
+  const [state, dispatch] = useReducer(windowReducer, initialState.state);
+  const nextWindowNumber = useRef(initialState.nextWindowNumber);
+  const { play } = useSystemSound();
 
   useEffect(() => {
     dispatch({ type: "SET_DESKTOP_SIZE", size: desktopSize });
   }, [desktopSize.height, desktopSize.width]);
+
+  useEffect(() => {
+    writeDesktopSession({
+      windows: state.windows,
+      activeWindowId: state.activeWindowId,
+      nextCascadeIndex: state.nextCascadeIndex,
+      nextZIndex: state.nextZIndex,
+      nextWindowNumber: nextWindowNumber.current,
+    });
+  }, [
+    state.activeWindowId,
+    state.nextCascadeIndex,
+    state.nextZIndex,
+    state.windows,
+  ]);
 
   const launch = useCallback(
     (appId: AppId, payload: WindowPayload = {}) => {
@@ -81,36 +102,42 @@ export function WindowManagerProvider({
       }
       nextWindowNumber.current += 1;
       const id = `${appId}-${nextWindowNumber.current}`;
+      play("open");
       dispatch({ type: "LAUNCH", id, definition, payload });
       return id;
     },
-    [registry],
+    [play, registry],
   );
 
   const focus = useCallback(
     (id: string) => dispatch({ type: "FOCUS", id }),
     [],
   );
-  const minimize = useCallback(
-    (id: string) => dispatch({ type: "MINIMIZE", id }),
-    [],
-  );
-  const maximize = useCallback(
-    (id: string) => dispatch({ type: "MAXIMIZE", id }),
-    [],
-  );
-  const restore = useCallback(
-    (id: string) => dispatch({ type: "RESTORE", id }),
-    [],
-  );
+  const minimize = useCallback((id: string) => {
+    play("minimize");
+    dispatch({ type: "MINIMIZE", id });
+  }, [play]);
+  const maximize = useCallback((id: string) => {
+    play("maximize");
+    dispatch({ type: "MAXIMIZE", id });
+  }, [play]);
+  const restore = useCallback((id: string) => {
+    play("restore");
+    dispatch({ type: "RESTORE", id });
+  }, [play]);
   const toggleTaskbar = useCallback(
-    (id: string) => dispatch({ type: "TOGGLE_TASKBAR", id }),
-    [],
+    (id: string) => {
+      const target = state.windows.find((windowInstance) => windowInstance.id === id);
+      if (target?.mode === "minimized") play("restore");
+      else if (state.activeWindowId === id) play("minimize");
+      dispatch({ type: "TOGGLE_TASKBAR", id });
+    },
+    [play, state.activeWindowId, state.windows],
   );
-  const close = useCallback(
-    (id: string) => dispatch({ type: "CLOSE", id }),
-    [],
-  );
+  const close = useCallback((id: string) => {
+    play("close");
+    dispatch({ type: "CLOSE", id });
+  }, [play]);
   const closeAll = useCallback(() => dispatch({ type: "CLOSE_ALL" }), []);
 
   const manager = useMemo<WindowManagerApi>(
@@ -206,4 +233,55 @@ function RegistryApplication({
   entry: WindowRegistryEntry;
 }) {
   return entry.render(context);
+}
+
+function restoreWindowState(
+  desktopSize: DesktopSize,
+  registry: WindowRegistry,
+): { state: WindowState; nextWindowNumber: number } {
+  const session = readDesktopSession();
+  if (!session) {
+    return {
+      state: { ...initialWindowState, desktopSize },
+      nextWindowNumber: 0,
+    };
+  }
+
+  const windows = session.windows.filter(({ appId }) => Boolean(registry[appId]));
+  const windowDefinitions = Object.fromEntries(
+    windows.map((windowInstance) => [
+      windowInstance.id,
+      registry[windowInstance.appId]!,
+    ]),
+  );
+  const windowCascadeIndexes = Object.fromEntries(
+    windows.map((windowInstance, index) => [windowInstance.id, index]),
+  );
+  const activeWindowId = windows.some(
+    ({ id, mode }) => id === session.activeWindowId && mode !== "minimized",
+  )
+    ? session.activeWindowId
+    : null;
+  const hydrated: WindowState = {
+    windows,
+    windowDefinitions,
+    windowCascadeIndexes,
+    activeWindowId,
+    desktopSize,
+    nextCascadeIndex: Math.max(session.nextCascadeIndex, windows.length),
+    nextZIndex: Math.max(
+      session.nextZIndex,
+      ...windows.map(({ zIndex }) => zIndex + 1),
+      1,
+    ),
+  };
+
+  return {
+    state: windowReducer(hydrated, { type: "SET_DESKTOP_SIZE", size: desktopSize }),
+    nextWindowNumber: Math.max(
+      session.nextWindowNumber,
+      ...windows.map(({ id }) => Number(id.match(/-(\d+)$/)?.[1] ?? 0)),
+      0,
+    ),
+  };
 }

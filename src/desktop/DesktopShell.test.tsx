@@ -237,6 +237,7 @@ describe("DesktopShell", () => {
       "Start",
       "Open applications",
       "My Projects task 1",
+      "Mute system sounds",
       "Minimize My Projects",
       "Maximize My Projects",
       "Close My Projects",
@@ -303,6 +304,56 @@ describe("DesktopShell", () => {
     fireEvent.click(taskButton);
     expect(screen.getByRole("heading", { name: "My Projects" })).toBeInTheDocument();
     expect(taskButton).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("restores the signed-in desktop and its open window after a refresh", () => {
+    const firstRender = renderDesktop();
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "Maximize My Projects" }));
+
+    firstRender.unmount();
+    render(<App />);
+
+    expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "My Projects" })).toHaveAttribute(
+      "data-window-mode",
+      "maximized",
+    );
+    expect(screen.getByRole("button", { name: /My Projects task/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("clears the desktop session on logoff so a refresh starts at boot", () => {
+    const firstRender = renderDesktop();
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
+    openStartAction("Log Off");
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Log Off" }));
+
+    firstRender.unmount();
+    render(<App />);
+
+    expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
+    expect(screen.queryByTestId("desktop-shell")).not.toBeInTheDocument();
+  });
+
+  it("persists the taskbar system-sound mute preference", () => {
+    const firstRender = renderDesktop();
+    fireEvent.click(screen.getByRole("button", { name: "Mute system sounds" }));
+    expect(screen.getByRole("button", { name: "Enable system sounds" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    firstRender.unmount();
+    render(<App />);
+
+    expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enable system sounds" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("opens My Pictures at the all-photo view and launches a separate viewer", () => {
@@ -398,12 +449,13 @@ describe("DesktopShell", () => {
 });
 
 function renderDesktop() {
-  render(<App />);
+  const result = render(<App />);
 
   act(() => vi.advanceTimersByTime(1_800));
   fireEvent.click(screen.getByRole("button", { name: "Harry" }));
   act(() => vi.advanceTimersByTime(650));
   expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
+  return result;
 }
 
 function openStartAction(name: "Log Off" | "Turn Off Computer") {

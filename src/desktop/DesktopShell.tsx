@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSystemSound } from "@/audio/SystemSoundProvider";
 import { DesktopIcon } from "@/desktop/DesktopIcon";
 import { PowerDialog, type PowerDialogMode } from "@/desktop/PowerDialog";
 import { StartMenu } from "@/desktop/StartMenu";
@@ -41,6 +42,7 @@ export function DesktopShell() {
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const { requestLogOff, requestRestart, requestTurnOff } = useSystemActions();
   const { closeAll, launch } = useWindowManager();
+  const { play } = useSystemSound();
 
   const dismissStart = useCallback(() => {
     setStartOpen(false);
@@ -101,6 +103,7 @@ export function DesktopShell() {
 
       <Taskbar
         onToggleStart={() => {
+          play("start");
           if (startOpen) dismissStart();
           else setStartOpen(true);
         }}

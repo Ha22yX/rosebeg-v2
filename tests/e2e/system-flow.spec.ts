@@ -14,6 +14,55 @@ test("boots, logs in, and logs off", async ({ page }) => {
   await expect(page.getByTestId("login-screen")).toBeVisible();
 });
 
+test("restores open and maximized windows after a page refresh", async ({ page }) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page.getByRole("button", { name: "My Projects", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Maximize My Projects", exact: true })
+    .click();
+
+  await page.reload();
+
+  await expect(page.getByTestId("desktop-shell")).toBeVisible();
+  await expect(
+    page.getByRole("dialog", { name: "My Projects", exact: true }),
+  ).toHaveAttribute("data-window-mode", "maximized");
+  await expect(page.getByTestId("boot-screen")).toHaveCount(0);
+});
+
+test("returns to boot after refreshing a logged-off session", async ({ page }) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Log Off", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Confirm Log Off", exact: true })
+    .click();
+  await expect(page.getByTestId("login-screen")).toBeVisible();
+
+  await page.reload();
+
+  await expect(page.getByTestId("boot-screen")).toBeVisible();
+});
+
+test("offers a persistent taskbar sound mute control", async ({ page }) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  const mute = page.getByRole("button", { name: "Mute system sounds", exact: true });
+  await expect(mute).toBeVisible();
+  await mute.click();
+  await expect(
+    page.getByRole("button", { name: "Enable system sounds", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await page.reload();
+
+  await expect(
+    page.getByRole("button", { name: "Enable system sounds", exact: true }),
+  ).toBeVisible();
+});
+
 test("dismisses the Start menu from the desktop and with Escape", async ({ page }) => {
   await page.goto("/");
   await loginToDesktop(page);

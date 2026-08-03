@@ -7,6 +7,11 @@ import {
   useReducer,
   type ReactNode,
 } from "react";
+import { useSystemSound } from "@/audio/SystemSoundProvider";
+import {
+  clearDesktopSession,
+  readDesktopSession,
+} from "@/persistence/desktop-session";
 import { BootScreen } from "@/system/BootScreen";
 import { LoginScreen } from "@/system/LoginScreen";
 import { PowerScreen } from "@/system/PowerScreen";
@@ -38,7 +43,12 @@ type SystemRootProps = {
 };
 
 export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
-  const [state, dispatch] = useReducer(systemReducer, initialSystemState);
+  const [state, dispatch] = useReducer(
+    systemReducer,
+    initialSystemState,
+    () => (readDesktopSession() ? { phase: "desktop" as const } : initialSystemState),
+  );
+  const { play } = useSystemSound();
   const systemPrefersReducedMotion = usePrefersReducedMotion();
   const prefersReducedMotion = reducedMotion ?? systemPrefersReducedMotion;
 
@@ -68,14 +78,29 @@ export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
 
   const actions = useMemo<SystemActions>(
     () => ({
-      requestLogOff: () => dispatch({ type: "CONFIRM_LOG_OFF" }),
-      requestTurnOff: () => dispatch({ type: "CONFIRM_TURN_OFF" }),
-      requestRestart: () => dispatch({ type: "CONFIRM_RESTART" }),
+      requestLogOff: () => {
+        clearDesktopSession();
+        play("logoff");
+        dispatch({ type: "CONFIRM_LOG_OFF" });
+      },
+      requestTurnOff: () => {
+        clearDesktopSession();
+        play("shutdown");
+        dispatch({ type: "CONFIRM_TURN_OFF" });
+      },
+      requestRestart: () => {
+        clearDesktopSession();
+        play("shutdown");
+        dispatch({ type: "CONFIRM_RESTART" });
+      },
     }),
-    [],
+    [play],
   );
 
-  const selectAccount = useCallback(() => dispatch({ type: "SELECT_ACCOUNT" }), []);
+  const selectAccount = useCallback(() => {
+    play("login");
+    dispatch({ type: "SELECT_ACCOUNT" });
+  }, [play]);
   const restart = useCallback(() => dispatch({ type: "RESTART" }), []);
 
   let content: ReactNode;

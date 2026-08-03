@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "@/app/app.css";
+import { SystemSoundProvider } from "@/audio/SystemSoundProvider";
 import { appRegistry } from "@/desktop/app-registry";
 import { DesktopShell } from "@/desktop/DesktopShell";
 import { SystemRoot } from "@/system/SystemRoot";
@@ -12,14 +13,16 @@ export function App() {
 
   return (
     <main aria-label="Rosebeg XP system" className="app-root">
-      <SystemRoot>
-        <WindowManagerProvider
-          desktopSize={desktopSize}
-          registry={appRegistry}
-        >
-          <DesktopShell />
-        </WindowManagerProvider>
-      </SystemRoot>
+      <SystemSoundProvider>
+        <SystemRoot>
+          <WindowManagerProvider
+            desktopSize={desktopSize}
+            registry={appRegistry}
+          >
+            <DesktopShell />
+          </WindowManagerProvider>
+        </SystemRoot>
+      </SystemSoundProvider>
     </main>
   );
 }

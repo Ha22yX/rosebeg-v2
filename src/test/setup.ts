@@ -1,5 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 
+afterEach(() => {
+  window.localStorage.clear();
+});
+
 class TestResizeObserver implements ResizeObserver {
   disconnect(): void {}
 
