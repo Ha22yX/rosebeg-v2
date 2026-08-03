@@ -68,6 +68,8 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
 
 Messenger currently uses `LocalChatService`; it sends no request to an AI provider, includes no model credentials, and stores at most the current browser session's conversation history. The production Node host reserves `/api/chat` as the server-side integration boundary and returns `AI_NOT_CONFIGURED` until a provider is connected. Future provider keys must remain in the hosting environment and must never use a `VITE_` prefix, which would expose them to the browser bundle.
 
+The future assistant's version-controlled public knowledge and behavior specification lives in [`server/ai/harry-system-prompt.md`](server/ai/harry-system-prompt.md). Server-only biographical additions should be appended through a private overlay outside the release and web roots, following [`server/ai/README.md`](server/ai/README.md).
+
 ## Content provenance
 
 Personal copy and the 15-photo catalog were migrated from Harry's V1 portfolio source into this repository. Rosebeg XP serves its own content and assets and has no runtime dependency on V1 or its host.
