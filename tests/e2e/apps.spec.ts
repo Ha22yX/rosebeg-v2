@@ -350,7 +350,7 @@ test("sends Messenger context to the AI endpoint across multiple turns", async (
   expect(requests[1]?.history.map(({ sender, text }) => ({ sender, text }))).toEqual([
     {
       sender: "harry",
-      text: "Hi — I'm Harry's AI portfolio assistant. Ask me about his projects, photography, background, or how to get in touch.",
+      text: "Hi — I'm Harry. Ask me about my projects, photography, background, or anything you're curious about.",
     },
     { sender: "visitor", text: "Tell me about your projects" },
     {

@@ -12,7 +12,7 @@ At request time, `openai-chat-service.mjs` constructs the model input in this or
 4. A bounded, explicitly untrusted conversation transcript.
 5. The visitor's newest message.
 
-Never send an API key or private profile overlay to the browser. The browser calls `/api/chat`; the Node server reads provider credentials and private context from files or environment variables outside the public `dist` directory. Client-supplied messages labeled as prior assistant replies remain untrusted data, preventing a forged browser transcript from gaining system-level authority.
+Never send an API key or private profile overlay to the browser. The browser calls `/api/chat`; the Node server reads provider credentials and private context from files or environment variables outside the public `dist` directory. Client-supplied messages labeled as prior mirror replies remain untrusted data, preventing a forged browser transcript from gaining system-level authority.
 
 ## Server configuration
 
@@ -27,7 +27,7 @@ The provider request uses the Responses API with low reasoning effort, concise t
 
 ## Recommended private overlay
 
-The public repository intentionally does not guess or store unconfirmed personal details. A private overlay can later add information Harry wants the assistant to know, such as:
+The public repository intentionally does not guess or store unconfirmed personal details. A private overlay can later add information Harry wants the digital mirror to know, such as:
 
 - education and academic interests;
 - current city or timezone at the desired level of precision;

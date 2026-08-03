@@ -15,7 +15,7 @@
   <img src="docs/screenshots/desktop.png" alt="Rosebeg XP desktop with four portfolio shortcuts" />
 </p>
 
-Rosebeg XP turns a personal portfolio into a working browser desktop instead of a conventional scrolling page. Sign in as Harry, open independent windows, browse project folders and photographs, read the About document, or talk to Harry's AI portfolio assistant.
+Rosebeg XP turns a personal portfolio into a working browser desktop instead of a conventional scrolling page. Sign in as Harry, open independent windows, browse project folders and photographs, read the About document, or talk naturally with Harry's AI-powered digital mirror.
 
 ## Features
 
@@ -24,7 +24,7 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
 - **Project Explorer:** nine software, robotics, creative-tool, and electronics projects with local folder views and source or demo shortcuts where configured.
 - **Photo workflow:** a 15-image Explorer gallery plus independent Picture and Fax Viewer windows with fit-relative zoom, centered scaling, rotation, and previous/next controls.
 - **About Notepad:** Markdown-rendered, read-only profile content with working selection, copy, and Word Wrap controls.
-- **Harry Messenger:** a server-side GPT-5.6 assistant grounded in Harry's portfolio profile, with natural multilingual replies and current-window conversation context.
+- **Harry Messenger:** a server-side GPT-5.6 digital mirror that speaks as Harry in first person, with natural multilingual replies and current-window conversation context.
 - **Responsive and accessible:** desktop, standard, and mobile layouts; semantic controls; keyboard navigation; reduced-motion support; and isolated application error states.
 
 ## Gallery
@@ -68,7 +68,7 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
 
 Messenger posts the current window's conversation to `/api/chat`, where the Node host validates and bounds the transcript before calling the OpenAI Responses API with `gpt-5.6-sol`. Responses API application-state storage is disabled, although OpenAI's applicable abuse-monitoring retention policy may still apply. The API key, private profile, safety salt, and base prompt remain server-side; provider keys must never use a `VITE_` prefix, which would expose them to the browser bundle. If no key is configured, the endpoint returns `AI_NOT_CONFIGURED` without attempting a provider request.
 
-The assistant's version-controlled public knowledge and behavior specification lives in [`server/ai/harry-system-prompt.md`](server/ai/harry-system-prompt.md). Server-only biographical additions are appended through a private overlay outside the release and web roots, following [`server/ai/README.md`](server/ai/README.md).
+The digital mirror's version-controlled public knowledge and behavior specification lives in [`server/ai/harry-system-prompt.md`](server/ai/harry-system-prompt.md). Server-only biographical additions are appended through a private overlay outside the release and web roots, following [`server/ai/README.md`](server/ai/README.md).
 
 ## Content provenance
 

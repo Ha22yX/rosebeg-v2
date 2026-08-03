@@ -28,6 +28,7 @@ describe("HarryMessenger", () => {
       "true",
     );
     expect(screen.getByText(localChatCopy.welcome)).toBeInTheDocument();
+    expect(screen.getByText("Online — digital mirror")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Message Harry" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
   });

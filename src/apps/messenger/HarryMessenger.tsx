@@ -196,7 +196,7 @@ export function HarryMessenger({
             <span aria-hidden="true" className="harry-messenger__avatar harry-messenger__avatar--large">H</span>
             <div>
               <h2>Harry</h2>
-              <p>{isOnline ? "Online — AI portfolio assistant" : "Offline — message not delivered"}</p>
+              <p>{isOnline ? "Online — digital mirror" : "Offline — message not delivered"}</p>
             </div>
           </header>
 

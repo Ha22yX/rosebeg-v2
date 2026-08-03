@@ -184,7 +184,7 @@ async function handleChatRequest(
       code,
       message:
         statusCode >= 500
-          ? "Harry's AI assistant is temporarily unavailable."
+          ? "Harry's digital mirror is temporarily unavailable."
           : error.message,
     });
   } finally {
