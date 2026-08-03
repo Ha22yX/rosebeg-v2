@@ -4,13 +4,11 @@ export type ViewerState = {
   index: number;
   zoom: number;
   rotation: 0 | 90 | 180 | 270;
-  fitToWindow: boolean;
 };
 
 export type ViewerAction =
   | { type: "NAVIGATE"; delta: -1 | 1; length: number }
   | { type: "ZOOM"; delta: -1 | 1 }
-  | { type: "ACTUAL_SIZE" }
   | { type: "FIT_TO_WINDOW" }
   | { type: "ROTATE"; delta: -90 | 90 };
 
@@ -61,13 +59,10 @@ export function photoStateReducer(
       return {
         ...state,
         zoom: zoomSteps[nextStep],
-        fitToWindow: false,
       };
     }
-    case "ACTUAL_SIZE":
-      return { ...state, zoom: 100, fitToWindow: false };
     case "FIT_TO_WINDOW":
-      return { ...state, zoom: 100, fitToWindow: true };
+      return { ...state, zoom: 100 };
     case "ROTATE":
       return { ...state, rotation: rotate(state.rotation, action.delta) };
   }

@@ -21,7 +21,7 @@ describe("PictureViewer", () => {
     expect(screen.getByText("15 of 15")).toBeInTheDocument();
   });
 
-  it("supports the full zoom, fit, and rotation toolbar", async () => {
+  it("treats 100% as fit to window and removes actual-size mode", async () => {
     const user = userEvent.setup();
     render(<PictureViewer initialSlug="stone-gate" />);
     const image = screen.getByRole("img", { name: "Stone Gate" });
@@ -33,10 +33,9 @@ describe("PictureViewer", () => {
     expect(viewport).toHaveAttribute("data-fit-to-window", "false");
 
     await user.click(screen.getByRole("button", { name: "Zoom out" }));
-    expect(screen.getByText("100%")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Actual size" }));
-    expect(viewport).toHaveAttribute("data-fit-to-window", "false");
-    expect(screen.getByText("Actual size")).toBeInTheDocument();
+    expect(screen.getByText("Fit to window")).toBeInTheDocument();
+    expect(viewport).toHaveAttribute("data-fit-to-window", "true");
+    expect(screen.queryByRole("button", { name: "Actual size" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Rotate clockwise" }));
     expect(image).toHaveStyle({ transform: "rotate(90deg) scale(1)" });

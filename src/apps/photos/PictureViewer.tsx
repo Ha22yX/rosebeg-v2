@@ -22,12 +22,10 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
         index: index >= 0 ? index : 0,
         zoom: 100,
         rotation: 0,
-        fitToWindow: true,
       };
     },
   );
   const [imageUnavailable, setImageUnavailable] = useState(false);
-  const [sizeMode, setSizeMode] = useState<"fit" | "actual" | "zoom">("fit");
   const photo = photos[state.index] ?? photos[0];
 
   const navigate = (delta: -1 | 1) => {
@@ -47,12 +45,8 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
     }
   };
 
-  const modeLabel =
-    sizeMode === "fit"
-      ? "Fit to window"
-      : sizeMode === "actual"
-        ? "Actual size"
-        : `${state.zoom}%`;
+  const isFitToWindow = state.zoom === 100;
+  const modeLabel = isFitToWindow ? "Fit to window" : `${state.zoom}%`;
 
   return (
     <section
@@ -73,7 +67,6 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
           glyph="＋"
           label="Zoom in"
           onClick={() => {
-            setSizeMode("zoom");
             dispatch({ type: "ZOOM", delta: 1 });
           }}
         />
@@ -81,23 +74,13 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
           glyph="−"
           label="Zoom out"
           onClick={() => {
-            setSizeMode("zoom");
             dispatch({ type: "ZOOM", delta: -1 });
-          }}
-        />
-        <ViewerButton
-          glyph="1:1"
-          label="Actual size"
-          onClick={() => {
-            setSizeMode("actual");
-            dispatch({ type: "ACTUAL_SIZE" });
           }}
         />
         <ViewerButton
           glyph="□"
           label="Fit to window"
           onClick={() => {
-            setSizeMode("fit");
             dispatch({ type: "FIT_TO_WINDOW" });
           }}
         />
@@ -117,11 +100,11 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
       <div
         aria-label="Photo viewport"
         className={`picture-viewer__viewport ${
-          state.fitToWindow
+          isFitToWindow
             ? "picture-viewer__viewport--fit"
             : "picture-viewer__viewport--actual"
         }`}
-        data-fit-to-window={String(state.fitToWindow)}
+        data-fit-to-window={String(isFitToWindow)}
       >
         {imageUnavailable ? (
           <div

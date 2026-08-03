@@ -16,34 +16,25 @@ describe("photo state", () => {
     expect(rotate(270, 90)).toBe(0);
   });
 
-  it("moves through the supported zoom steps and disables fit mode", () => {
+  it("changes relative zoom from the fitted 100% size", () => {
     const initial: ViewerState = {
       index: 0,
       zoom: 100,
       rotation: 0,
-      fitToWindow: true,
     };
 
     const zoomedIn = photoStateReducer(initial, { type: "ZOOM", delta: 1 });
-    expect(zoomedIn).toEqual({ ...initial, zoom: 125, fitToWindow: false });
+    expect(zoomedIn).toEqual({ ...initial, zoom: 125 });
 
-    const zoomedOut = photoStateReducer(zoomedIn, { type: "ZOOM", delta: -1 });
-    expect(zoomedOut).toEqual({ ...initial, fitToWindow: false });
+    const zoomedOut = photoStateReducer(initial, { type: "ZOOM", delta: -1 });
+    expect(zoomedOut).toEqual({ ...initial, zoom: 75 });
   });
 
-  it("resets manual zoom when returning to fit-to-window mode", () => {
-    const zoomed: ViewerState = {
-      index: 0,
-      zoom: 300,
-      rotation: 0,
-      fitToWindow: false,
-    };
+  it("restores the fitted 100% zoom", () => {
+    const initial: ViewerState = { index: 0, zoom: 100, rotation: 0 };
+    const zoomed = { ...initial, zoom: 300 };
 
-    expect(photoStateReducer(zoomed, { type: "FIT_TO_WINDOW" })).toEqual({
-      ...zoomed,
-      zoom: 100,
-      fitToWindow: true,
-    });
+    expect(photoStateReducer(zoomed, { type: "FIT_TO_WINDOW" })).toEqual(initial);
   });
 
   it("swaps fit axes for both quarter-turn rotations", () => {
