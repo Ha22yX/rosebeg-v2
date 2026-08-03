@@ -39,6 +39,19 @@ describe("ProjectsExplorer", () => {
     ).toHaveAttribute("rel", "noreferrer");
   });
 
+  it("presents repository and demo links as prominent project actions", () => {
+    render(<ProjectsExplorer initialProjectSlug="photoback" />);
+
+    expect(screen.getByRole("link", { name: "View repository" }))
+      .toHaveClass("projects-explorer__shortcut--repository");
+    const demoLink = screen.getByRole("link", { name: "View demo" });
+    expect(demoLink).toHaveClass("projects-explorer__shortcut--demo");
+    expect(demoLink).toHaveAttribute(
+      "href",
+      "https://photoback.rosebeg.com/view/8b6ab9d9",
+    );
+  });
+
   it("filters projects by name, kicker, category, and stack", async () => {
     const user = userEvent.setup();
     render(<ProjectsExplorer />);

@@ -533,19 +533,80 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
 .projects-explorer__shortcut {
-  padding: 4px 8px;
-  border: 1px solid #7f9db9;
-  color: #003399;
-  background: linear-gradient(#fff, #e7edf7);
+  display: inline-flex;
+  min-width: 142px;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  border: 1px solid #073b8f;
+  border-radius: 3px;
+  color: #fff;
+  background: linear-gradient(#4d92ef 0%, #2868c7 48%, #174eaa 100%);
+  box-shadow:
+    inset 1px 1px rgb(255 255 255 / 72%),
+    inset -1px -1px rgb(0 26 91 / 45%),
+    1px 1px 2px rgb(0 0 0 / 20%);
+  font-weight: 700;
   text-decoration: none;
+  text-shadow: 1px 1px #123d80;
 }
 
 .projects-explorer__shortcut:hover {
-  text-decoration: underline;
+  border-color: #002e7a;
+  background: linear-gradient(#6cabff 0%, #347ee0 48%, #1858bf 100%);
+}
+
+.projects-explorer__shortcut:focus-visible {
+  outline: 1px dotted #fff;
+  outline-offset: -4px;
+}
+
+.projects-explorer__shortcut:active {
+  padding-top: 6px;
+  padding-bottom: 4px;
+  background: linear-gradient(#174a9d, #2868c7);
+  box-shadow: inset 2px 2px 3px rgb(0 24 74 / 58%);
+}
+
+.projects-explorer__shortcut--demo {
+  border-color: #326d0b;
+  background: linear-gradient(#79bd45 0%, #4f9b22 48%, #347d13 100%);
+  text-shadow: 1px 1px #285e12;
+}
+
+.projects-explorer__shortcut--demo:hover {
+  border-color: #285f06;
+  background: linear-gradient(#91d45a 0%, #62ad31 48%, #3e9018 100%);
+}
+
+.projects-explorer__shortcut--demo:active {
+  background: linear-gradient(#347d13, #4f9b22);
+  box-shadow: inset 2px 2px 3px rgb(22 66 5 / 62%);
+}
+
+.projects-explorer__shortcut-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 2px;
+  background: rgb(255 255 255 / 16%);
+  box-shadow: inset 1px 1px rgb(255 255 255 / 25%);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.projects-explorer__shortcut-external {
+  margin-left: auto;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .projects-explorer__file-list {
@@ -783,7 +844,13 @@ a.projects-explorer__file:hover {
   }
 
   .projects-explorer__shortcuts {
+    width: 100%;
     justify-content: flex-start;
+  }
+
+  .projects-explorer__shortcut {
+    min-width: 126px;
+    flex: 1;
   }
 
   .projects-explorer__status {

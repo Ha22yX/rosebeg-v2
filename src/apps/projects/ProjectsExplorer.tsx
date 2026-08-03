@@ -497,12 +497,22 @@ function ProjectDetail({
             <p>{project.files.length} items in this folder</p>
           </div>
           <div className="projects-explorer__shortcuts">
-            <ExternalLink className="projects-explorer__shortcut" href={project.sourceUrl}>
-              View repository
+            <ExternalLink
+              className="projects-explorer__shortcut projects-explorer__shortcut--repository"
+              href={project.sourceUrl}
+            >
+              <span aria-hidden="true" className="projects-explorer__shortcut-icon">▣</span>
+              <span>View repository</span>
+              <span aria-hidden="true" className="projects-explorer__shortcut-external">↗</span>
             </ExternalLink>
             {project.websiteUrl ? (
-              <ExternalLink className="projects-explorer__shortcut" href={project.websiteUrl}>
-                View demo
+              <ExternalLink
+                className="projects-explorer__shortcut projects-explorer__shortcut--demo"
+                href={project.websiteUrl}
+              >
+                <span aria-hidden="true" className="projects-explorer__shortcut-icon">▶</span>
+                <span>View demo</span>
+                <span aria-hidden="true" className="projects-explorer__shortcut-external">↗</span>
               </ExternalLink>
             ) : null}
           </div>
