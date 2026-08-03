@@ -144,6 +144,98 @@ test("shows all photos, opens two viewers, and advances with ArrowRight", async 
   await expect(secondViewer.getByText("3 of 15", { exact: true })).toBeVisible();
 });
 
+test("zooms relative to fit, preserves the viewport center, and refits on resize", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page.getByRole("button", { name: "My Pictures", exact: true }).click();
+
+  const browser = page.getByRole("dialog", {
+    name: "My Pictures",
+    exact: true,
+  });
+  await browser
+    .getByRole("button", { name: "Stone Gate photo", exact: true })
+    .press("Enter");
+
+  const viewer = page.getByRole("dialog", {
+    name: "Windows Picture and Fax Viewer",
+    exact: true,
+  });
+  const viewport = viewer.getByLabel("Photo viewport", { exact: true });
+  const canvas = viewer.locator(".picture-viewer__canvas");
+  const image = viewer.getByRole("img", { name: "Stone Gate", exact: true });
+
+  await expect(image).toBeVisible();
+  await expect(viewport).toHaveAttribute("data-zoom", "100");
+  await expect(viewer.getByText("100%", { exact: true })).toBeVisible();
+  await expect(
+    viewer.getByRole("button", { name: "Actual size", exact: true }),
+  ).toHaveCount(0);
+
+  const centerBefore = await viewport.evaluate((viewportNode) => {
+    const canvasNode = viewportNode.querySelector<HTMLElement>(
+      ".picture-viewer__canvas",
+    );
+    if (!canvasNode) throw new Error("Picture canvas is missing");
+    const viewportRect = viewportNode.getBoundingClientRect();
+    const canvasRect = canvasNode.getBoundingClientRect();
+    return {
+      x: (viewportRect.left + viewportRect.width / 2 - canvasRect.left) /
+        canvasRect.width,
+      y: (viewportRect.top + viewportRect.height / 2 - canvasRect.top) /
+        canvasRect.height,
+    };
+  });
+
+  await viewer.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await expect(viewport).toHaveAttribute("data-zoom", "125");
+  await expect(viewer.getByText("125%", { exact: true })).toBeVisible();
+
+  const centerAfter = await canvas.evaluate((canvasNode) => {
+    const viewportNode = canvasNode.parentElement?.parentElement;
+    if (!(viewportNode instanceof HTMLElement)) {
+      throw new Error("Picture viewport is missing");
+    }
+    const viewportRect = viewportNode.getBoundingClientRect();
+    const canvasRect = canvasNode.getBoundingClientRect();
+    return {
+      x: (viewportRect.left + viewportRect.width / 2 - canvasRect.left) /
+        canvasRect.width,
+      y: (viewportRect.top + viewportRect.height / 2 - canvasRect.top) /
+        canvasRect.height,
+    };
+  });
+  expect(centerAfter.x).toBeCloseTo(centerBefore.x, 2);
+  expect(centerAfter.y).toBeCloseTo(centerBefore.y, 2);
+
+  await viewer
+    .getByRole("button", { name: "Fit to window", exact: true })
+    .click();
+  await expect(viewport).toHaveAttribute("data-zoom", "100");
+  const widthBeforeResize = await image.evaluate((node) => node.getBoundingClientRect().width);
+
+  const resizeHandle = viewer.locator(".xp-window__resize--east");
+  const resizeHandleBox = await resizeHandle.boundingBox();
+  if (!resizeHandleBox) throw new Error("Viewer east resize handle is not visible");
+  await page.mouse.move(
+    resizeHandleBox.x + resizeHandleBox.width / 2,
+    resizeHandleBox.y + resizeHandleBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    resizeHandleBox.x + resizeHandleBox.width / 2 - 140,
+    resizeHandleBox.y + resizeHandleBox.height / 2,
+  );
+  await page.mouse.up();
+
+  await expect.poll(async () =>
+    image.evaluate((node) => node.getBoundingClientRect().width),
+  ).not.toBe(widthBeforeResize);
+  await expect(viewport).toHaveAttribute("data-zoom", "100");
+});
+
 test("wraps Notepad content by default and allows Word Wrap to be toggled", async ({ page }) => {
   await page.goto("/");
   await loginToDesktop(page);
