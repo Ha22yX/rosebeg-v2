@@ -10,8 +10,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "check": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
-    "test": "vitest run",
+    "build": "node --check server/index.mjs && tsc --noEmit && vite build",
+    "start": "node server/index.mjs",
+    "test": "vitest run && node --test server/index.node-test.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/visual.spec.ts"
