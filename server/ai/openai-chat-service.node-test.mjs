@@ -114,6 +114,7 @@ test("the production prompt enforces Harry's first-person human voice", async ()
   assert.match(prompt, /sound like a real 18-year-old Harry/i);
   assert.match(prompt, /你平时喜欢干什么/);
   assert.match(prompt, /这个还真有点难选/);
+  assert.match(prompt, /Messenger displays plain text/);
 });
 
 test("extracts text only from assistant output message items", () => {
