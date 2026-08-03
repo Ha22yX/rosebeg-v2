@@ -1,7 +1,4 @@
-import type {
-  KeyboardEvent,
-  PointerEvent as ReactPointerEvent,
-} from "react";
+import type { MouseEvent } from "react";
 import { XpIcon } from "@/shared/XpIcon";
 
 type DesktopIconProps = {
@@ -11,15 +8,8 @@ type DesktopIconProps = {
 };
 
 export function DesktopIcon({ icon, label, onOpen }: DesktopIconProps) {
-  const handlePointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType !== "touch") return;
-    event.preventDefault();
-    onOpen();
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (event.detail >= 2) return;
     onOpen();
   };
 
@@ -27,9 +17,7 @@ export function DesktopIcon({ icon, label, onOpen }: DesktopIconProps) {
     <button
       aria-label={label}
       className="desktop-icon"
-      onDoubleClick={onOpen}
-      onKeyDown={handleKeyDown}
-      onPointerUp={handlePointerUp}
+      onClick={handleClick}
       type="button"
     >
       <XpIcon alt="" className="desktop-icon__image" size={48} src={icon} />

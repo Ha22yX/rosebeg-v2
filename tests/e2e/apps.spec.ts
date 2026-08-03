@@ -19,6 +19,24 @@ const photoNames = [
   "Night Pavilion",
 ] as const;
 
+test("opens exactly one desktop window for click and double-click", async ({ page }) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page.getByRole("button", { name: "My Projects", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "My Projects", exact: true }),
+  ).toHaveCount(1);
+
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page
+    .getByRole("button", { name: "My Projects", exact: true })
+    .dblclick();
+  await expect(
+    page.getByRole("dialog", { name: "My Projects", exact: true }),
+  ).toHaveCount(1);
+});
+
 test("navigates project history and filters project folders", async ({ page }) => {
   await page.goto("/");
   await loginToDesktop(page);

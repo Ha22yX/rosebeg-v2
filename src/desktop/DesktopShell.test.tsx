@@ -42,11 +42,31 @@ describe("DesktopShell", () => {
     vi.useRealTimers();
   });
 
+  it("opens one window after a single desktop icon click", async () => {
+    renderDesktop();
+    vi.useRealTimers();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "My Projects" }));
+
+    expect(screen.getAllByRole("heading", { name: "My Projects" })).toHaveLength(1);
+  });
+
+  it("opens exactly one window after a double desktop icon click", async () => {
+    renderDesktop();
+    vi.useRealTimers();
+    const user = userEvent.setup();
+
+    await user.dblClick(screen.getByRole("button", { name: "My Projects" }));
+
+    expect(screen.getAllByRole("heading", { name: "My Projects" })).toHaveLength(1);
+  });
+
   it("launches a new window and task button for every desktop activation", () => {
     renderDesktop();
 
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
 
     expect(screen.getAllByRole("heading", { name: "My Projects" })).toHaveLength(2);
     expect(
@@ -106,30 +126,46 @@ describe("DesktopShell", () => {
     expect(pictures[1]).toHaveAccessibleDescription("Start menu places");
   });
 
-  it("launches a desktop app with one touch pointer activation", () => {
+  it("launches a desktop app with a touch-generated click", () => {
     renderDesktop();
 
-    fireEvent.pointerUp(screen.getByRole("button", { name: "Harry Messenger" }), {
+    const messengerIcon = screen.getByRole("button", { name: "Harry Messenger" });
+    fireEvent.pointerUp(messengerIcon, {
       button: 0,
       pointerId: 7,
       pointerType: "touch",
     });
+    fireEvent.click(messengerIcon, { detail: 1 });
 
     expect(
       screen.getByRole("heading", { name: "Harry Messenger" }),
     ).toBeInTheDocument();
   });
 
-  it("launches the focused desktop app with Enter", () => {
+  it("launches the focused desktop app with Enter", async () => {
     renderDesktop();
+    vi.useRealTimers();
+    const user = userEvent.setup();
     const aboutIcon = screen.getByRole("button", { name: "About Harry" });
 
     aboutIcon.focus();
-    fireEvent.keyDown(aboutIcon, { key: "Enter" });
+    await user.keyboard("{Enter}");
 
     expect(
       screen.getByRole("heading", { name: "About Harry - Notepad" }),
     ).toBeInTheDocument();
+  });
+
+  it("launches the focused desktop app with Space", async () => {
+    renderDesktop();
+    vi.useRealTimers();
+    const user = userEvent.setup();
+    const messengerIcon = screen.getByRole("button", { name: "Harry Messenger" });
+
+    messengerIcon.focus();
+    await user.keyboard(" ");
+
+    expect(screen.getByRole("heading", { name: "Harry Messenger" })).toBeInTheDocument();
   });
 
   it("updates the tray clock at the next minute boundary", () => {
@@ -152,7 +188,7 @@ describe("DesktopShell", () => {
     Object.defineProperty(window, "innerHeight", { value: 844 });
     renderDesktop();
 
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
 
     const explorerWindow = screen.getByRole("dialog", { name: "My Projects" });
     expect(explorerWindow).toHaveStyle({
@@ -172,7 +208,7 @@ describe("DesktopShell", () => {
     Object.defineProperty(window, "innerHeight", { value: 1080 });
     renderDesktop();
 
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
 
     expect(screen.getByRole("dialog", { name: "My Projects" })).toHaveStyle({
       width: "900px",
@@ -185,7 +221,7 @@ describe("DesktopShell", () => {
 
   it("tabs through named desktop, window, and Explorer controls in DOM order", async () => {
     renderDesktop();
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
     vi.useRealTimers();
     const user = userEvent.setup();
     expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
@@ -222,7 +258,7 @@ describe("DesktopShell", () => {
     const projectsIcon = screen.getByRole("button", { name: "My Projects" });
 
     for (let index = 0; index < 6; index += 1) {
-      fireEvent.doubleClick(projectsIcon);
+      fireEvent.click(projectsIcon);
     }
 
     const tasks = screen.getAllByRole("button", { name: /My Projects task/i });
@@ -257,7 +293,7 @@ describe("DesktopShell", () => {
 
   it("minimizes and restores the active window from its taskbar button", () => {
     renderDesktop();
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
     const taskButton = screen.getByRole("button", { name: /My Projects task/i });
 
     fireEvent.click(taskButton);
@@ -271,7 +307,7 @@ describe("DesktopShell", () => {
 
   it("opens My Pictures at the all-photo view and launches a separate viewer", () => {
     renderDesktop();
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Pictures" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Pictures" }));
 
     expect(screen.getByLabelText("Pictures")).toBeInTheDocument();
     fireEvent.doubleClick(screen.getByRole("button", { name: "Stone Gate photo" }));
@@ -293,7 +329,7 @@ describe("DesktopShell", () => {
 
   it("logs off through confirmation and returns with an empty desktop", () => {
     renderDesktop();
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
     openStartAction("Log Off");
 
     expect(screen.getByRole("dialog", { name: "Log Off Windows" })).toBeInTheDocument();
@@ -313,7 +349,7 @@ describe("DesktopShell", () => {
 
   it("cancels Turn Off Computer without closing the desktop or its windows", () => {
     renderDesktop();
-    fireEvent.doubleClick(screen.getByRole("button", { name: "My Projects" }));
+    fireEvent.click(screen.getByRole("button", { name: "My Projects" }));
     openStartAction("Turn Off Computer");
 
     expect(
