@@ -93,6 +93,19 @@ describe("PictureViewer", () => {
     expect(screen.getByText("15 of 15")).toBeInTheDocument();
   });
 
+  it("ignores a late error from the image replaced during navigation", async () => {
+    render(<PictureViewer initialSlug="stone-gate" />);
+    const replacedImage = screen.getByRole("img", { name: "Stone Gate" });
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Next photo" }));
+      fireEvent.error(replacedImage);
+    });
+
+    expect(screen.getByRole("img", { name: "Underline Skyline" })).toBeInTheDocument();
+    expect(screen.queryByText("Image unavailable")).not.toBeInTheDocument();
+  });
+
   it("starts at fitted 100% and has no actual-size control", () => {
     render(<PictureViewer initialSlug="stone-gate" />);
     const viewport = screen.getByLabelText("Photo viewport");

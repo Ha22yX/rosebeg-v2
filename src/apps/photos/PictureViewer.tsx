@@ -46,7 +46,9 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
       };
     },
   );
-  const [imageUnavailable, setImageUnavailable] = useState(false);
+  const [unavailableImageSrc, setUnavailableImageSrc] = useState<string | null>(
+    null,
+  );
   const [loadedImage, setLoadedImage] = useState<LoadedImage | null>(null);
   const [viewportSize, setViewportSize] = useState<Size>(EMPTY_SIZE);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -54,6 +56,9 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
   const viewportSizeRef = useRef(viewportSize);
   const pendingFocalRef = useRef<FocalPoint | null>(null);
   const photo = photos[state.index] ?? photos[0];
+  const activePhotoRef = useRef(photo);
+  activePhotoRef.current = photo;
+  const imageUnavailable = unavailableImageSrc === photo?.imageSrc;
 
   const naturalSize =
     loadedImage?.slug === photo?.slug ? loadedImage : EMPTY_SIZE;
@@ -152,7 +157,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
   }, [layout, viewportSize]);
 
   const navigate = (delta: -1 | 1) => {
-    setImageUnavailable(false);
+    setUnavailableImageSrc(null);
     pendingFocalRef.current = { x: 0.5, y: 0.5 };
     dispatch({ type: "NAVIGATE", delta, length: photos.length });
   };
@@ -175,15 +180,33 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
   };
 
   const handleImageLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+    const imageSrc = event.currentTarget.getAttribute("src");
+    const activePhoto = activePhotoRef.current;
+    if (!activePhoto || imageSrc !== activePhoto.imageSrc) return;
+
     const { naturalHeight, naturalWidth } = event.currentTarget;
     if (!naturalWidth || !naturalHeight) return;
 
     pendingFocalRef.current = { x: 0.5, y: 0.5 };
+    setUnavailableImageSrc((failedSrc) =>
+      failedSrc === activePhoto.imageSrc ? null : failedSrc,
+    );
     setLoadedImage({
-      slug: photo.slug,
+      slug: activePhoto.slug,
       width: naturalWidth,
       height: naturalHeight,
     });
+  };
+
+  const handleImageError = (event: SyntheticEvent<HTMLImageElement>) => {
+    const failedSrc = event.currentTarget.getAttribute("src") ?? photo.imageSrc;
+    if (activePhotoRef.current?.imageSrc === failedSrc) {
+      pendingFocalRef.current = null;
+    }
+    setLoadedImage((currentImage) =>
+      currentImage?.slug === photo.slug ? null : currentImage,
+    );
+    setUnavailableImageSrc(failedSrc);
   };
 
   return (
@@ -266,11 +289,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
                 data-fit-axis={fitAxisForRotation(state.rotation)}
                 decoding="async"
                 key={photo.slug}
-                onError={() => {
-                  pendingFocalRef.current = null;
-                  setLoadedImage(null);
-                  setImageUnavailable(true);
-                }}
+                onError={handleImageError}
                 onLoad={handleImageLoad}
                 src={photo.imageSrc}
                 style={{
