@@ -27,6 +27,9 @@ test("opens exactly one desktop window for click and double-click", async ({ pag
     page.getByRole("dialog", { name: "My Projects", exact: true }),
   ).toHaveCount(1);
 
+  await page.evaluate(() =>
+    localStorage.removeItem("rosebeg-xp:desktop-session:v1"),
+  );
   await page.goto("/");
   await loginToDesktop(page);
   await page
@@ -286,7 +289,23 @@ test("wraps Notepad content by default and allows Word Wrap to be toggled", asyn
   ).toHaveAttribute("aria-checked", "false");
 });
 
-test("sends a Messenger message and receives the local reply", async ({ page }) => {
+test("sends Messenger context to the AI endpoint across multiple turns", async ({ page }) => {
+  const requests: Array<{
+    history: Array<{ sender: string; text: string }>;
+    message: string;
+  }> = [];
+  const replies = [
+    "I build software, electronics, and autonomous-system projects.",
+    "Your first question was about my projects.",
+  ];
+  await page.route("**/api/chat", async (route) => {
+    requests.push(route.request().postDataJSON());
+    await route.fulfill({
+      contentType: "application/json",
+      json: { reply: replies.shift() },
+      status: 200,
+    });
+  });
   await page.goto("/");
   await loginToDesktop(page);
   await page
@@ -311,8 +330,33 @@ test("sends a Messenger message and receives the local reply", async ({ page }) 
   ).toBeVisible();
   await expect(
     conversation.getByText(
-      "Selected projects span AI tools, autonomous systems, embedded electronics, and full-stack products.",
+      "I build software, electronics, and autonomous-system projects.",
       { exact: true },
     ),
   ).toBeVisible();
+
+  await messenger
+    .getByRole("textbox", { name: "Message Harry", exact: true })
+    .fill("What did I ask first?");
+  await messenger.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(
+    conversation.getByText("Your first question was about my projects.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  expect(requests).toHaveLength(2);
+  expect(requests[1]?.message).toBe("What did I ask first?");
+  expect(requests[1]?.history.map(({ sender, text }) => ({ sender, text }))).toEqual([
+    {
+      sender: "harry",
+      text: "Hi — I'm Harry's AI portfolio assistant. Ask me about his projects, photography, background, or how to get in touch.",
+    },
+    { sender: "visitor", text: "Tell me about your projects" },
+    {
+      sender: "harry",
+      text: "I build software, electronics, and autonomous-system projects.",
+    },
+    { sender: "visitor", text: "What did I ask first?" },
+  ]);
 });

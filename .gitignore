@@ -6,6 +6,7 @@ playwright-report/
 test-results/
 .env
 .env.*
+server/ai/harry-private-profile.md
 .DS_Store
 *.tsbuildinfo
 debug-*.png

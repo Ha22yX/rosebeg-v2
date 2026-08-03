@@ -14,6 +14,10 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("HarryMessenger", () => {
   it("renders one selected Harry contact, the welcome, and an accessible composer", () => {
     render(<HarryMessenger />);
@@ -194,8 +198,44 @@ describe("HarryMessenger", () => {
     expect(screen.getByText("Not delivered")).toBeInTheDocument();
   });
 
+  it("uses the AI endpoint by default and includes earlier turns in the next request", async () => {
+    const user = userEvent.setup();
+    const requestBodies: Array<{
+      history: Array<{ sender: string; text: string }>;
+      message: string;
+    }> = [];
+    const answers = ["Nice to meet you, Alex.", "You told me your name is Alex."];
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (_input, options) => {
+      requestBodies.push(JSON.parse(String(options?.body)));
+      return new Response(JSON.stringify({ reply: answers.shift() }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    });
+    render(<HarryMessenger storageKey="test:ai-context" />);
+
+    const textbox = screen.getByRole("textbox", { name: "Message Harry" });
+    await user.type(textbox, "My name is Alex.{Enter}");
+    expect(await screen.findByText("Nice to meet you, Alex.")).toBeInTheDocument();
+
+    await user.type(textbox, "What name did I tell you?{Enter}");
+    expect(
+      await screen.findByText("You told me your name is Alex."),
+    ).toBeInTheDocument();
+
+    expect(requestBodies).toHaveLength(2);
+    expect(requestBodies[1]?.message).toBe("What name did I tell you?");
+    expect(requestBodies[1]?.history.map(({ sender, text }) => ({ sender, text }))).toEqual([
+      { sender: "harry", text: localChatCopy.welcome },
+      { sender: "visitor", text: "My name is Alex." },
+      { sender: "harry", text: "Nice to meet you, Alex." },
+      { sender: "visitor", text: "What name did I tell you?" },
+    ]);
+  });
+
   it("keeps simultaneous Messenger instances isolated", async () => {
     const user = userEvent.setup();
+    mockAiReply(localChatCopy.projects);
     const first = renderRegistryMessenger("harry-messenger-1");
     const second = renderRegistryMessenger("harry-messenger-2");
 
@@ -212,6 +252,7 @@ describe("HarryMessenger", () => {
 
   it("does not leak a completed transcript into a later registry window", async () => {
     const user = userEvent.setup();
+    mockAiReply(localChatCopy.projects);
     const first = renderRegistryMessenger("harry-messenger-1");
 
     await user.type(
@@ -240,4 +281,13 @@ function renderRegistryMessenger(windowId: string) {
   });
 
   return render(<>{messenger}</>);
+}
+
+function mockAiReply(reply: string) {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(JSON.stringify({ reply }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    }),
+  );
 }

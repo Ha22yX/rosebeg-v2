@@ -12,7 +12,7 @@
     "check": "tsc --noEmit",
     "build": "node --check server/index.mjs && tsc --noEmit && vite build",
     "start": "node server/index.mjs",
-    "test": "vitest run && node --test server/index.node-test.mjs",
+    "test": "vitest run && node --test server/index.node-test.mjs server/ai/openai-chat-service.node-test.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:visual": "playwright test tests/e2e/visual.spec.ts"

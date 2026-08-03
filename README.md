@@ -15,7 +15,7 @@
   <img src="docs/screenshots/desktop.png" alt="Rosebeg XP desktop with four portfolio shortcuts" />
 </p>
 
-Rosebeg XP turns a personal portfolio into a working browser desktop instead of a conventional scrolling page. Sign in as Harry, open independent windows, browse project folders and photographs, read the About document, or talk to the local Messenger adapter.
+Rosebeg XP turns a personal portfolio into a working browser desktop instead of a conventional scrolling page. Sign in as Harry, open independent windows, browse project folders and photographs, read the About document, or talk to Harry's AI portfolio assistant.
 
 ## Features
 
@@ -24,7 +24,7 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
 - **Project Explorer:** nine software, robotics, creative-tool, and electronics projects with local folder views and source or demo shortcuts where configured.
 - **Photo workflow:** a 15-image Explorer gallery plus independent Picture and Fax Viewer windows with fit-relative zoom, centered scaling, rotation, and previous/next controls.
 - **About Notepad:** Markdown-rendered, read-only profile content with working selection, copy, and Word Wrap controls.
-- **Harry Messenger:** a typed `ChatService` boundary backed by deterministic local replies for projects, photography, contact details, and AI connection status.
+- **Harry Messenger:** a server-side GPT-5.6 assistant grounded in Harry's portfolio profile, with natural multilingual replies and current-window conversation context.
 - **Responsive and accessible:** desktop, standard, and mobile layouts; semantic controls; keyboard navigation; reduced-motion support; and isolated application error states.
 
 ## Gallery
@@ -43,7 +43,7 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
   </tr>
   <tr>
     <td><strong>My Pictures.</strong> All 15 photographs remain visible in one browser.</td>
-    <td><strong>Harry Messenger.</strong> Local portfolio replies sit behind an adapter ready for a future service.</td>
+    <td><strong>Harry Messenger.</strong> The XP chat client talks to a server-side AI endpoint without exposing provider credentials.</td>
   </tr>
 </table>
 
@@ -61,14 +61,14 @@ Rosebeg XP turns a personal portfolio into a working browser desktop instead of 
 | --- | --- | --- |
 | Interface | React 19 | Desktop shell, applications, system phases, and window composition |
 | Language and build | TypeScript 7 + Vite 7 | Static checking, development server, and production bundle |
-| Content | React Markdown + typed local records | About document, projects, photos, contacts, and chat copy |
+| Content | React Markdown + typed local records | About document, projects, photos, contacts, and AI grounding context |
 | Styling | Repository-local CSS and assets | XP visual system without runtime image hotlinks |
-| Production host | Node.js + Nginx | SPA/static delivery, security headers, health checks, and a server-side API boundary |
+| Production host | Node.js + Nginx + OpenAI Responses API | SPA/static delivery, security headers, health checks, rate-limited AI chat, and server-only credentials |
 | Verification | Vitest, Testing Library, jsdom, and Playwright | Unit, component, functional browser, and visual regression coverage |
 
-Messenger currently uses `LocalChatService`; it sends no request to an AI provider, includes no model credentials, and stores at most the current browser session's conversation history. The production Node host reserves `/api/chat` as the server-side integration boundary and returns `AI_NOT_CONFIGURED` until a provider is connected. Future provider keys must remain in the hosting environment and must never use a `VITE_` prefix, which would expose them to the browser bundle.
+Messenger posts the current window's conversation to `/api/chat`, where the Node host validates and bounds the transcript before calling the OpenAI Responses API with `gpt-5.6-sol`. Responses API application-state storage is disabled, although OpenAI's applicable abuse-monitoring retention policy may still apply. The API key, private profile, safety salt, and base prompt remain server-side; provider keys must never use a `VITE_` prefix, which would expose them to the browser bundle. If no key is configured, the endpoint returns `AI_NOT_CONFIGURED` without attempting a provider request.
 
-The future assistant's version-controlled public knowledge and behavior specification lives in [`server/ai/harry-system-prompt.md`](server/ai/harry-system-prompt.md). Server-only biographical additions should be appended through a private overlay outside the release and web roots, following [`server/ai/README.md`](server/ai/README.md).
+The assistant's version-controlled public knowledge and behavior specification lives in [`server/ai/harry-system-prompt.md`](server/ai/harry-system-prompt.md). Server-only biographical additions are appended through a private overlay outside the release and web roots, following [`server/ai/README.md`](server/ai/README.md).
 
 ## Content provenance
 
@@ -94,10 +94,12 @@ For the production-style Node host:
 npm run build
 $env:HOST = "127.0.0.1"
 $env:PORT = "3000"
+$env:OPENAI_API_KEY = "<server-only key>"
+$env:OPENAI_MODEL = "gpt-5.6-sol"
 npm start
 ```
 
-The Node process serves `dist/`, exposes `/api/health`, applies security headers, and falls back to `index.html` for client routes. In production, Nginx terminates HTTPS and proxies to this loopback-only process.
+The Node process serves `dist/`, exposes `/api/health` and `/api/chat`, applies security headers, and falls back to `index.html` for client routes. `HARRY_PRIVATE_PROFILE_PATH` and `CHAT_SAFETY_SALT` are optional server-only settings. In production, Nginx terminates HTTPS and proxies to this loopback-only process.
 
 ### Test matrix
 
@@ -129,7 +131,7 @@ docs/screenshots/  README screenshots copied from verified baselines
 
 ## Status
 
-Rosebeg XP V2 is deployed at [harry.rosebeg.com](https://harry.rosebeg.com/) as a BaoTa-managed Node project behind Nginx and HTTPS. Messenger remains intentionally local-only until `/api/chat` is connected to an AI provider through server-side environment configuration.
+Rosebeg XP V2 is deployed at [harry.rosebeg.com](https://harry.rosebeg.com/) as a BaoTa-managed Node project behind Nginx and HTTPS. Harry Messenger uses a rate-limited server-side OpenAI integration so provider credentials and private profile context never enter the browser bundle.
 
 ## Contact
 
