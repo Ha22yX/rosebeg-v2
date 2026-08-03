@@ -1,4 +1,19 @@
-import { useReducer, useState, type KeyboardEvent } from "react";
+import {
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type SyntheticEvent,
+} from "react";
+import {
+  calculateFocus,
+  calculatePhotoLayout,
+  calculateScroll,
+  type PhotoLayout,
+  type Size,
+} from "@/apps/photos/photo-geometry";
 import {
   fitAxisForRotation,
   photoStateReducer,
@@ -11,6 +26,12 @@ import "@/apps/photos/photos.css";
 export type PictureViewerProps = {
   initialSlug: string;
 };
+
+type LoadedImage = Size & { slug: string };
+
+type FocalPoint = { x: number; y: number };
+
+const EMPTY_SIZE: Size = { width: 0, height: 0 };
 
 export function PictureViewer({ initialSlug }: PictureViewerProps) {
   const [state, dispatch] = useReducer(
@@ -26,10 +47,113 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
     },
   );
   const [imageUnavailable, setImageUnavailable] = useState(false);
+  const [loadedImage, setLoadedImage] = useState<LoadedImage | null>(null);
+  const [viewportSize, setViewportSize] = useState<Size>(EMPTY_SIZE);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const viewportSizeRef = useRef(viewportSize);
+  const pendingFocalRef = useRef<FocalPoint | null>(null);
   const photo = photos[state.index] ?? photos[0];
+
+  const naturalSize =
+    loadedImage?.slug === photo?.slug ? loadedImage : EMPTY_SIZE;
+  const layout = useMemo(
+    () =>
+      calculatePhotoLayout(
+        naturalSize,
+        viewportSize,
+        state.rotation,
+        state.zoom,
+      ),
+    [naturalSize, state.rotation, state.zoom, viewportSize],
+  );
+  const layoutRef = useRef<PhotoLayout>(layout);
+  layoutRef.current = layout;
+  viewportSizeRef.current = viewportSize;
+
+  const captureViewportCenter = () => {
+    const viewport = viewportRef.current;
+    const canvas = canvasRef.current;
+    const currentLayout = layoutRef.current;
+    if (!viewport || !canvas || !currentLayout.canvas.width || !currentLayout.canvas.height) {
+      pendingFocalRef.current ??= { x: 0.5, y: 0.5 };
+      return;
+    }
+
+    const measuredViewport = viewportSizeRef.current;
+    pendingFocalRef.current = {
+      x: calculateFocus(
+        viewport.scrollLeft,
+        viewport.clientWidth || measuredViewport.width,
+        canvas.offsetLeft,
+        currentLayout.canvas.width,
+      ),
+      y: calculateFocus(
+        viewport.scrollTop,
+        viewport.clientHeight || measuredViewport.height,
+        canvas.offsetTop,
+        currentLayout.canvas.height,
+      ),
+    };
+  };
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries.find((candidate) => candidate.target === viewport);
+      if (!entry) return;
+
+      const nextSize = {
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      };
+      const currentSize = viewportSizeRef.current;
+      if (
+        nextSize.width === currentSize.width &&
+        nextSize.height === currentSize.height
+      ) {
+        return;
+      }
+
+      captureViewportCenter();
+      viewportSizeRef.current = nextSize;
+      setViewportSize(nextSize);
+    });
+
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  useLayoutEffect(() => {
+    const focus = pendingFocalRef.current;
+    const viewport = viewportRef.current;
+    const canvas = canvasRef.current;
+    if (!focus || !viewport || !canvas || !layout.canvas.width || !layout.canvas.height) {
+      return;
+    }
+
+    viewport.scrollLeft = calculateScroll(
+      focus.x,
+      viewport.clientWidth || viewportSize.width,
+      canvas.offsetLeft,
+      layout.canvas.width,
+      layout.stage.width,
+    );
+    viewport.scrollTop = calculateScroll(
+      focus.y,
+      viewport.clientHeight || viewportSize.height,
+      canvas.offsetTop,
+      layout.canvas.height,
+      layout.stage.height,
+    );
+    pendingFocalRef.current = null;
+  }, [layout, viewportSize]);
 
   const navigate = (delta: -1 | 1) => {
     setImageUnavailable(false);
+    pendingFocalRef.current = { x: 0.5, y: 0.5 };
     dispatch({ type: "NAVIGATE", delta, length: photos.length });
   };
 
@@ -45,8 +169,22 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
     }
   };
 
-  const isFitToWindow = state.zoom === 100;
-  const modeLabel = isFitToWindow ? "Fit to window" : `${state.zoom}%`;
+  const dispatchWithFocus = (action: Parameters<typeof dispatch>[0]) => {
+    captureViewportCenter();
+    dispatch(action);
+  };
+
+  const handleImageLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+    const { naturalHeight, naturalWidth } = event.currentTarget;
+    if (!naturalWidth || !naturalHeight) return;
+
+    pendingFocalRef.current = { x: 0.5, y: 0.5 };
+    setLoadedImage({
+      slug: photo.slug,
+      width: naturalWidth,
+      height: naturalHeight,
+    });
+  };
 
   return (
     <section
@@ -67,68 +205,83 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
           glyph="＋"
           label="Zoom in"
           onClick={() => {
-            dispatch({ type: "ZOOM", delta: 1 });
+            dispatchWithFocus({ type: "ZOOM", delta: 1 });
           }}
         />
         <ViewerButton
           glyph="−"
           label="Zoom out"
           onClick={() => {
-            dispatch({ type: "ZOOM", delta: -1 });
+            dispatchWithFocus({ type: "ZOOM", delta: -1 });
           }}
         />
         <ViewerButton
           glyph="□"
           label="Fit to window"
           onClick={() => {
-            dispatch({ type: "FIT_TO_WINDOW" });
+            dispatchWithFocus({ type: "FIT_TO_WINDOW" });
           }}
         />
         <span aria-hidden="true" className="picture-viewer__separator" />
         <ViewerButton
           glyph="↶"
           label="Rotate counter-clockwise"
-          onClick={() => dispatch({ type: "ROTATE", delta: -90 })}
+          onClick={() => dispatchWithFocus({ type: "ROTATE", delta: -90 })}
         />
         <ViewerButton
           glyph="↷"
           label="Rotate clockwise"
-          onClick={() => dispatch({ type: "ROTATE", delta: 90 })}
+          onClick={() => dispatchWithFocus({ type: "ROTATE", delta: 90 })}
         />
       </nav>
 
       <div
         aria-label="Photo viewport"
-        className={`picture-viewer__viewport ${
-          isFitToWindow
-            ? "picture-viewer__viewport--fit"
-            : "picture-viewer__viewport--actual"
-        }`}
-        data-fit-to-window={String(isFitToWindow)}
+        className="picture-viewer__viewport"
+        data-zoom={state.zoom}
+        ref={viewportRef}
       >
-        {imageUnavailable ? (
+        <div
+          className="picture-viewer__stage"
+          style={{ height: layout.stage.height, width: layout.stage.width }}
+        >
           <div
-            aria-label={`${photo.title} image unavailable`}
-            className="picture-viewer__unavailable"
-            role="img"
+            className="picture-viewer__canvas"
+            ref={canvasRef}
+            style={{ height: layout.canvas.height, width: layout.canvas.width }}
           >
-            <span aria-hidden="true">×</span>
-            <strong>Image unavailable</strong>
-            <p>This picture could not be displayed.</p>
+            {imageUnavailable ? (
+              <div
+                aria-label={`${photo.title} image unavailable`}
+                className="picture-viewer__unavailable"
+                role="img"
+              >
+                <span aria-hidden="true">×</span>
+                <strong>Image unavailable</strong>
+                <p>This picture could not be displayed.</p>
+              </div>
+            ) : (
+              <img
+                alt={photo.title}
+                data-fit-axis={fitAxisForRotation(state.rotation)}
+                decoding="async"
+                key={photo.slug}
+                onError={() => {
+                  pendingFocalRef.current = null;
+                  setLoadedImage(null);
+                  setImageUnavailable(true);
+                }}
+                onLoad={handleImageLoad}
+                src={photo.imageSrc}
+                style={{
+                  height: layout.image.height,
+                  transform: `rotate(${state.rotation}deg)`,
+                  width: layout.image.width,
+                }}
+              />
+            )}
           </div>
-        ) : (
-          <img
-            alt={photo.title}
-            data-fit-axis={fitAxisForRotation(state.rotation)}
-            decoding="async"
-            onError={() => setImageUnavailable(true)}
-            src={photo.imageSrc}
-            style={{
-              aspectRatio: photo.aspectRatio,
-              transform: `rotate(${state.rotation}deg) scale(${state.zoom / 100})`,
-            }}
-          />
-        )}
+        </div>
       </div>
 
       <footer className="picture-viewer__information">
@@ -138,7 +291,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
         </div>
         <div aria-live="polite" className="picture-viewer__status">
           <span>{state.index + 1} of {photos.length}</span>
-          <span>{modeLabel}</span>
+          <span>{state.zoom}%</span>
         </div>
       </footer>
     </section>

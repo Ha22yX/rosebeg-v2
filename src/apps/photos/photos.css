@@ -585,15 +585,11 @@
 
 .picture-viewer__viewport {
   position: relative;
-  display: flex;
   min-width: 0;
   min-height: 0;
-  align-items: center;
-  justify-content: center;
   flex: 1;
   overflow: auto;
   overscroll-behavior: contain;
-  container-type: size;
   background:
     linear-gradient(45deg, #d1d1d1 25%, transparent 25%) 0 0 / 12px 12px,
     linear-gradient(45deg, transparent 75%, #d1d1d1 75%) 0 0 / 12px 12px,
@@ -601,42 +597,27 @@
     linear-gradient(45deg, #d1d1d1 25%, #dedede 25%) 6px 6px / 12px 12px;
 }
 
-.picture-viewer__viewport img {
+.picture-viewer__stage,
+.picture-viewer__canvas {
+  display: grid;
+  place-items: center;
+}
+
+.picture-viewer__stage {
+  min-width: 0;
+  min-height: 0;
+}
+
+.picture-viewer__canvas {
+  position: relative;
+}
+
+.picture-viewer__canvas > img {
   display: block;
-  flex: 0 0 auto;
-  object-fit: contain;
-  object-position: center;
-  transform-origin: center;
-  transition: transform 120ms ease-out;
-}
-
-.picture-viewer__viewport--fit {
-  padding: 14px;
-}
-
-.picture-viewer__viewport--fit img {
-  width: auto;
-  height: auto;
-  max-width: calc(100cqw - 28px);
-  max-height: calc(100cqh - 28px);
-}
-
-.picture-viewer__viewport--fit img[data-fit-axis="swapped"] {
-  max-width: calc(100cqh - 28px);
-  max-height: calc(100cqw - 28px);
-}
-
-.picture-viewer__viewport--actual {
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 24px;
-}
-
-.picture-viewer__viewport--actual img {
-  width: auto;
-  height: auto;
   max-width: none;
   max-height: none;
+  transform-origin: center;
+  transition: transform 120ms ease-out;
 }
 
 .picture-viewer__unavailable {
@@ -733,10 +714,6 @@
     margin-inline: 1px;
   }
 
-  .picture-viewer__viewport--fit {
-    padding: 7px;
-  }
-
   .picture-viewer__information {
     min-height: 68px;
     align-items: stretch;
@@ -754,7 +731,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .picture-viewer__viewport img {
+  .picture-viewer__canvas > img {
     transition: none;
   }
 }
