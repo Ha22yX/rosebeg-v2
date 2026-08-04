@@ -120,6 +120,23 @@ test("shows all photos, opens two viewers, and advances with ArrowRight", async 
       }),
     ).toBeAttached();
   }
+  const firstThumbnail = browser
+    .getByRole("button", { name: "Stone Gate photo", exact: true })
+    .getByRole("img", { name: "Stone Gate", exact: true });
+  await expect(firstThumbnail).toHaveAttribute(
+    "src",
+    "/assets/photos/signal-plain-thumb.jpg",
+  );
+  await expect
+    .poll(() =>
+      firstThumbnail.evaluate((image) => (image as HTMLImageElement).currentSrc),
+    )
+    .toContain("/assets/photos/signal-plain-thumb.webp");
+  await expect
+    .poll(() =>
+      firstThumbnail.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBe(320);
   await browser
     .getByRole("button", { name: "Stone Gate photo", exact: true })
     .press("Enter");
@@ -145,6 +162,113 @@ test("shows all photos, opens two viewers, and advances with ArrowRight", async 
     }),
   ).toBeVisible();
   await expect(secondViewer.getByText("3 of 15", { exact: true })).toBeVisible();
+  const responsiveImage = secondViewer.getByRole("img", {
+    name: "Crosswalk Heat",
+    exact: true,
+  });
+  await expect
+    .poll(() =>
+      responsiveImage.evaluate((image) => (image as HTMLImageElement).currentSrc),
+    )
+    .toContain("/assets/photos/quiet-edge-1280.webp");
+  await expect
+    .poll(() =>
+      responsiveImage.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  await expect
+    .poll(() =>
+      responsiveImage.evaluate((image) => (image as HTMLImageElement).complete),
+    )
+    .toBe(true);
+  await expect(
+    secondViewer.getByLabel("Crosswalk Heat image unavailable", { exact: true }),
+  ).toHaveCount(0);
+});
+
+test("decodes every optimized photograph and serves every responsive candidate", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await loginToDesktop(page);
+  await page.getByRole("button", { name: "My Pictures", exact: true }).click();
+
+  const browser = page.getByRole("dialog", {
+    name: "My Pictures",
+    exact: true,
+  });
+
+  for (const photoName of photoNames) {
+    const thumbnail = browser
+      .getByRole("button", { name: `${photoName} photo`, exact: true })
+      .getByRole("img", { name: photoName, exact: true });
+    await thumbnail.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        thumbnail.evaluate((image) => ({
+          complete: (image as HTMLImageElement).complete,
+          currentSrc: (image as HTMLImageElement).currentSrc,
+          naturalWidth: (image as HTMLImageElement).naturalWidth,
+        })),
+      )
+      .toEqual({
+        complete: true,
+        currentSrc: expect.stringContaining("-thumb.webp"),
+        naturalWidth: expect.any(Number),
+      });
+    expect(await thumbnail.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+
+  await browser
+    .getByRole("button", { name: "Stone Gate photo", exact: true })
+    .press("Enter");
+  const viewer = page.getByRole("dialog", {
+    name: "Windows Picture and Fax Viewer",
+    exact: true,
+  });
+
+  for (const [index, photoName] of photoNames.entries()) {
+    const image = viewer.getByRole("img", { name: photoName, exact: true });
+    await expect(image).toBeVisible();
+    await expect
+      .poll(() =>
+        image.evaluate((node) => ({
+          complete: (node as HTMLImageElement).complete,
+          currentSrc: (node as HTMLImageElement).currentSrc,
+          naturalWidth: (node as HTMLImageElement).naturalWidth,
+        })),
+      )
+      .toEqual({
+        complete: true,
+        currentSrc: expect.stringContaining("-1280.webp"),
+        naturalWidth: expect.any(Number),
+      });
+    expect(await image.evaluate((node) => (node as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect(
+      viewer.getByLabel(`${photoName} image unavailable`, { exact: true }),
+    ).toHaveCount(0);
+
+    const srcSet = await viewer
+      .locator('source[type="image/webp"]')
+      .getAttribute("srcset");
+    expect(srcSet).not.toBeNull();
+    const candidatePaths = srcSet!
+      .split(",")
+      .map((candidate) => candidate.trim().split(/\s+/)[0]!)
+      .filter(Boolean);
+    for (const candidatePath of candidatePaths) {
+      const response = await page.request.get(
+        new URL(candidatePath, page.url()).toString(),
+      );
+      expect(response.ok(), `${candidatePath} should exist`).toBe(true);
+      expect(response.headers()["content-type"]).toBe("image/webp");
+      await response.dispose();
+    }
+
+    if (index < photoNames.length - 1) {
+      await viewer.getByRole("button", { name: "Next photo", exact: true }).click();
+    }
+  }
 });
 
 test("zooms relative to fit, preserves the viewport center, and refits on resize", async ({

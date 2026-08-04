@@ -140,7 +140,18 @@ async function openStart(page: Page): Promise<void> {
 
 async function waitForImages(page: Page): Promise<void> {
   await page.waitForFunction(() =>
-    Array.from(document.images).every((image) => image.complete),
+    Array.from(document.images).every((image) => {
+      const bounds = image.getBoundingClientRect();
+      const visible =
+        bounds.width > 0 &&
+        bounds.height > 0 &&
+        bounds.right > 0 &&
+        bounds.bottom > 0 &&
+        bounds.left < window.innerWidth &&
+        bounds.top < window.innerHeight;
+
+      return !visible || image.complete;
+    }),
   );
 }
 

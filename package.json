@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "optimize:photos": "node scripts/optimize-photos.mjs",
     "check": "tsc --noEmit",
     "build": "node --check server/index.mjs && tsc --noEmit && vite build",
     "start": "node server/index.mjs",

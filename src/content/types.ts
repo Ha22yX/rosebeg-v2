@@ -25,7 +25,14 @@ export type PhotoItem = {
   title: string;
   description: string;
   thumbnailSrc: string;
+  thumbnailFallbackSrc: string;
+  thumbnailWidth: number;
+  thumbnailHeight: number;
   imageSrc: string;
+  imageSrcSet: string;
+  imageSizes: string;
+  imageWidth: number;
+  imageHeight: number;
   aspectRatio: number;
 };
 

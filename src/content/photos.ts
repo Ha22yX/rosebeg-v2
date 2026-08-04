@@ -1,19 +1,191 @@
 import type { PhotoItem } from "@/content/types";
 
+type PhotoDefinition = {
+  slug: string;
+  title: string;
+  description: string;
+  assetStem: string;
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  imageWidth: number;
+  imageHeight: number;
+};
+
+const PHOTO_ASSET_DIRECTORY = "/assets/photos";
+const FILMSTRIP_PREVIEW_SIZES = "720px";
+
+function definePhoto({ assetStem, ...definition }: PhotoDefinition): PhotoItem {
+  const responsiveWidths = [
+    1280,
+    ...(definition.imageWidth > 1920 ? [1920] : []),
+    definition.imageWidth,
+  ];
+
+  return {
+    ...definition,
+    thumbnailSrc: `${PHOTO_ASSET_DIRECTORY}/${assetStem}-thumb.webp`,
+    thumbnailFallbackSrc: `${PHOTO_ASSET_DIRECTORY}/${assetStem}-thumb.jpg`,
+    imageSrc: `${PHOTO_ASSET_DIRECTORY}/${assetStem}-large.jpg`,
+    imageSrcSet: responsiveWidths
+      .map((width) => {
+        const suffix = width === definition.imageWidth ? "large" : String(width);
+        return `${PHOTO_ASSET_DIRECTORY}/${assetStem}-${suffix}.webp ${width}w`;
+      })
+      .join(", "),
+    imageSizes: FILMSTRIP_PREVIEW_SIZES,
+    aspectRatio: definition.imageWidth / definition.imageHeight,
+  };
+}
+
 export const photos = [
-  { slug: "stone-gate", title: "Stone Gate", description: "A quiet threshold held in old masonry and winter light.", thumbnailSrc: "/assets/photos/signal-plain-thumb.jpg", imageSrc: "/assets/photos/signal-plain-large.jpg", aspectRatio: 2400 / 1800 },
-  { slug: "underline-skyline", title: "Underline Skyline", description: "A city cut by shadow, steel, and a distant tower.", thumbnailSrc: "/assets/photos/violet-street-thumb.jpg", imageSrc: "/assets/photos/violet-street-large.jpg", aspectRatio: 2400 / 1800 },
-  { slug: "crosswalk-heat", title: "Crosswalk Heat", description: "Street geometry washed in red light and noon glare.", thumbnailSrc: "/assets/photos/quiet-edge-thumb.jpg", imageSrc: "/assets/photos/quiet-edge-large.jpg", aspectRatio: 2400 / 1800 },
-  { slug: "library-drift", title: "Library Drift", description: "A soft corridor of books dissolving into focus.", thumbnailSrc: "/assets/photos/night-current-thumb.jpg", imageSrc: "/assets/photos/night-current-large.jpg", aspectRatio: 2400 / 1173 },
-  { slug: "harbor-weather", title: "Harbor Weather", description: "Blue air, water, and towers held in a clean horizon.", thumbnailSrc: "/assets/photos/glass-weather-thumb.jpg", imageSrc: "/assets/photos/glass-weather-large.jpg", aspectRatio: 2400 / 1597 },
-  { slug: "window-afterimage", title: "Window Afterimage", description: "The city reduced to panes, silhouettes, and late light.", thumbnailSrc: "/assets/photos/afterimage-thumb.jpg", imageSrc: "/assets/photos/afterimage-large.jpg", aspectRatio: 1655 / 2400 },
-  { slug: "wall-feathers", title: "Wall Feathers", description: "A black wall bird turning masonry into motion.", thumbnailSrc: "/assets/photos/mural-bird-thumb.jpg", imageSrc: "/assets/photos/mural-bird-large.jpg", aspectRatio: 8657 / 6493 },
-  { slug: "cloud-needle", title: "Cloud Needle", description: "Glass towers held under fast blue weather.", thumbnailSrc: "/assets/photos/skyline-cloud-thumb.jpg", imageSrc: "/assets/photos/skyline-cloud-large.jpg", aspectRatio: 7453 / 9937 },
-  { slug: "avenue-signal", title: "Avenue Signal", description: "Warm traffic, vertical signs, and a tower cutting through.", thumbnailSrc: "/assets/photos/avenue-signal-thumb.jpg", imageSrc: "/assets/photos/avenue-signal-large.jpg", aspectRatio: 6422 / 8562 },
-  { slug: "atrium-pulse", title: "Atrium Pulse", description: "A stained ceiling folding light into a radial frame.", thumbnailSrc: "/assets/photos/glass-roof-thumb.jpg", imageSrc: "/assets/photos/glass-roof-large.jpg", aspectRatio: 9868 / 7401 },
-  { slug: "amber-room", title: "Amber Room", description: "Quiet chairs and red window light inside a still library.", thumbnailSrc: "/assets/photos/reading-room-thumb.jpg", imageSrc: "/assets/photos/reading-room-large.jpg", aspectRatio: 10567 / 7925 },
-  { slug: "white-cross", title: "White Cross", description: "Architecture reduced to edge, shadow, and negative space.", thumbnailSrc: "/assets/photos/architectural-cross-thumb.jpg", imageSrc: "/assets/photos/architectural-cross-large.jpg", aspectRatio: 11656 / 8742 },
-  { slug: "grid-horizon", title: "Grid Horizon", description: "A skyline seen through the measured rhythm of glass.", thumbnailSrc: "/assets/photos/window-grid-thumb.jpg", imageSrc: "/assets/photos/window-grid-large.jpg", aspectRatio: 11656 / 8742 },
-  { slug: "gold-recital", title: "Gold Recital", description: "Seasonal light, music, and a small crowd gathered in warmth.", thumbnailSrc: "/assets/photos/holiday-stage-thumb.jpg", imageSrc: "/assets/photos/holiday-stage-large.jpg", aspectRatio: 11656 / 8742 },
-  { slug: "night-pavilion", title: "Night Pavilion", description: "A luminous frame glowing against the evening field.", thumbnailSrc: "/assets/photos/night-pavilion-thumb.jpg", imageSrc: "/assets/photos/night-pavilion-large.jpg", aspectRatio: 11656 / 4826 },
+  definePhoto({
+    slug: "stone-gate",
+    title: "Stone Gate",
+    description: "A quiet threshold held in old masonry and winter light.",
+    assetStem: "signal-plain",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 2400,
+    imageHeight: 1800,
+  }),
+  definePhoto({
+    slug: "underline-skyline",
+    title: "Underline Skyline",
+    description: "A city cut by shadow, steel, and a distant tower.",
+    assetStem: "violet-street",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 2400,
+    imageHeight: 1800,
+  }),
+  definePhoto({
+    slug: "crosswalk-heat",
+    title: "Crosswalk Heat",
+    description: "Street geometry washed in red light and noon glare.",
+    assetStem: "quiet-edge",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 2400,
+    imageHeight: 1800,
+  }),
+  definePhoto({
+    slug: "library-drift",
+    title: "Library Drift",
+    description: "A soft corridor of books dissolving into focus.",
+    assetStem: "night-current",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 2400,
+    imageHeight: 1173,
+  }),
+  definePhoto({
+    slug: "harbor-weather",
+    title: "Harbor Weather",
+    description: "Blue air, water, and towers held in a clean horizon.",
+    assetStem: "glass-weather",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 2400,
+    imageHeight: 1597,
+  }),
+  definePhoto({
+    slug: "window-afterimage",
+    title: "Window Afterimage",
+    description: "The city reduced to panes, silhouettes, and late light.",
+    assetStem: "afterimage",
+    thumbnailWidth: 320,
+    thumbnailHeight: 320,
+    imageWidth: 1655,
+    imageHeight: 2400,
+  }),
+  definePhoto({
+    slug: "wall-feathers",
+    title: "Wall Feathers",
+    description: "A black wall bird turning masonry into motion.",
+    assetStem: "mural-bird",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "cloud-needle",
+    title: "Cloud Needle",
+    description: "Glass towers held under fast blue weather.",
+    assetStem: "skyline-cloud",
+    thumbnailWidth: 240,
+    thumbnailHeight: 320,
+    imageWidth: 1650,
+    imageHeight: 2200,
+  }),
+  definePhoto({
+    slug: "avenue-signal",
+    title: "Avenue Signal",
+    description: "Warm traffic, vertical signs, and a tower cutting through.",
+    assetStem: "avenue-signal",
+    thumbnailWidth: 240,
+    thumbnailHeight: 320,
+    imageWidth: 1650,
+    imageHeight: 2200,
+  }),
+  definePhoto({
+    slug: "atrium-pulse",
+    title: "Atrium Pulse",
+    description: "A stained ceiling folding light into a radial frame.",
+    assetStem: "glass-roof",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "amber-room",
+    title: "Amber Room",
+    description: "Quiet chairs and red window light inside a still library.",
+    assetStem: "reading-room",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "white-cross",
+    title: "White Cross",
+    description: "Architecture reduced to edge, shadow, and negative space.",
+    assetStem: "architectural-cross",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "grid-horizon",
+    title: "Grid Horizon",
+    description: "A skyline seen through the measured rhythm of glass.",
+    assetStem: "window-grid",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "gold-recital",
+    title: "Gold Recital",
+    description: "Seasonal light, music, and a small crowd gathered in warmth.",
+    assetStem: "holiday-stage",
+    thumbnailWidth: 320,
+    thumbnailHeight: 240,
+    imageWidth: 2200,
+    imageHeight: 1650,
+  }),
+  definePhoto({
+    slug: "night-pavilion",
+    title: "Night Pavilion",
+    description: "A luminous frame glowing against the evening field.",
+    assetStem: "night-pavilion",
+    thumbnailWidth: 320,
+    thumbnailHeight: 133,
+    imageWidth: 2200,
+    imageHeight: 911,
+  }),
 ] satisfies readonly PhotoItem[];

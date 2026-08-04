@@ -22,8 +22,27 @@ describe("portfolio content", () => {
     expect(new Set(photos.map(({ slug }) => slug)).size).toBe(15);
     expect(
       photos.every(
-        ({ thumbnailSrc, imageSrc }) =>
-          thumbnailSrc.startsWith("/assets/photos/") && imageSrc.startsWith("/assets/photos/"),
+        ({
+          thumbnailSrc,
+          thumbnailFallbackSrc,
+          thumbnailWidth,
+          thumbnailHeight,
+          imageSrc,
+          imageSrcSet,
+          imageWidth,
+          imageHeight,
+        }) =>
+          thumbnailSrc.startsWith("/assets/photos/") &&
+          thumbnailSrc.endsWith("-thumb.webp") &&
+          thumbnailFallbackSrc.endsWith("-thumb.jpg") &&
+          thumbnailWidth <= 320 &&
+          thumbnailHeight <= 320 &&
+          imageSrc.startsWith("/assets/photos/") &&
+          imageSrc.endsWith("-large.jpg") &&
+          imageSrcSet.includes("-1280.webp 1280w") &&
+          imageSrcSet.includes("-large.webp") &&
+          imageWidth >= 1280 &&
+          imageHeight > 0,
       ),
     ).toBe(true);
   });

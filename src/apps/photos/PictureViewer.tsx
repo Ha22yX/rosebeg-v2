@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useLayoutEffect,
   useMemo,
   useReducer,
@@ -32,6 +33,7 @@ type LoadedImage = Size & { slug: string };
 type FocalPoint = { x: number; y: number };
 
 const EMPTY_SIZE: Size = { width: 0, height: 0 };
+const INITIAL_RESPONSIVE_IMAGE_WIDTH = 900;
 
 export function PictureViewer({ initialSlug }: PictureViewerProps) {
   const [state, dispatch] = useReducer(
@@ -52,7 +54,7 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
   const [loadedImage, setLoadedImage] = useState<LoadedImage | null>(null);
   const [viewportSize, setViewportSize] = useState<Size>(EMPTY_SIZE);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLElement>(null);
   const viewportSizeRef = useRef(viewportSize);
   const pendingFocalRef = useRef<FocalPoint | null>(null);
   const photo = photos[state.index] ?? photos[0];
@@ -75,6 +77,12 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
   const layoutRef = useRef<PhotoLayout>(layout);
   layoutRef.current = layout;
   viewportSizeRef.current = viewportSize;
+  const responsiveImageSizes = `${Math.ceil(
+    layout.image.width || viewportSize.width || INITIAL_RESPONSIVE_IMAGE_WIDTH,
+  )}px`;
+  const setCanvasRef = useCallback((element: HTMLElement | null) => {
+    canvasRef.current = element;
+  }, []);
 
   const captureViewportCenter = () => {
     const viewport = viewportRef.current;
@@ -268,12 +276,12 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
           className="picture-viewer__stage"
           style={{ height: layout.stage.height, width: layout.stage.width }}
         >
-          <div
-            className="picture-viewer__canvas"
-            ref={canvasRef}
-            style={{ height: layout.canvas.height, width: layout.canvas.width }}
-          >
-            {imageUnavailable ? (
+          {imageUnavailable ? (
+            <div
+              className="picture-viewer__canvas"
+              ref={setCanvasRef}
+              style={{ height: layout.canvas.height, width: layout.canvas.width }}
+            >
               <div
                 aria-label={`${photo.title} image unavailable`}
                 className="picture-viewer__unavailable"
@@ -283,12 +291,24 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
                 <strong>Image unavailable</strong>
                 <p>This picture could not be displayed.</p>
               </div>
-            ) : (
+            </div>
+          ) : (
+            <picture
+              className="picture-viewer__canvas"
+              key={photo.slug}
+              ref={setCanvasRef}
+              style={{ height: layout.canvas.height, width: layout.canvas.width }}
+            >
+              <source
+                sizes={responsiveImageSizes}
+                srcSet={photo.imageSrcSet}
+                type="image/webp"
+              />
               <img
                 alt={photo.title}
                 data-fit-axis={fitAxisForRotation(state.rotation)}
                 decoding="async"
-                key={photo.slug}
+                height={photo.imageHeight}
                 onError={handleImageError}
                 onLoad={handleImageLoad}
                 src={photo.imageSrc}
@@ -297,9 +317,10 @@ export function PictureViewer({ initialSlug }: PictureViewerProps) {
                   transform: `rotate(${state.rotation}deg)`,
                   width: layout.image.width,
                 }}
+                width={photo.imageWidth}
               />
-            )}
-          </div>
+            </picture>
+          )}
         </div>
       </div>
 

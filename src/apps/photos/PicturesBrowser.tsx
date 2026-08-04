@@ -266,10 +266,15 @@ function PhotoButton({
       type="button"
     >
       <PhotoImage
+        fetchPriority={selected ? "high" : undefined}
         failed={failed}
+        height={photo.thumbnailHeight}
+        loading={selected ? "eager" : "lazy"}
         onError={onError}
         photo={photo}
-        src={photo.thumbnailSrc}
+        src={photo.thumbnailFallbackSrc}
+        srcSet={photo.thumbnailSrc}
+        width={photo.thumbnailWidth}
       />
       <span className="pictures-browser__photo-copy">
         <strong>{photo.title}</strong>
@@ -291,7 +296,18 @@ function FilmstripPreview({
   return (
     <section aria-label="Selected picture preview" className="pictures-browser__preview">
       <div className="pictures-browser__preview-image">
-        <PhotoImage failed={failed} onError={onError} photo={photo} src={photo.imageSrc} />
+        <PhotoImage
+          fetchPriority="high"
+          failed={failed}
+          height={photo.imageHeight}
+          loading="eager"
+          onError={onError}
+          photo={photo}
+          sizes={photo.imageSizes}
+          src={photo.imageSrc}
+          srcSet={photo.imageSrcSet}
+          width={photo.imageWidth}
+        />
       </div>
       <div className="pictures-browser__preview-copy">
         <h1>{photo.title}</h1>
@@ -306,11 +322,23 @@ function PhotoImage({
   src,
   failed,
   onError,
+  loading,
+  fetchPriority,
+  height,
+  sizes,
+  srcSet,
+  width,
 }: {
   photo: PhotoItem;
   src: string;
   failed: boolean;
   onError(): void;
+  loading: "eager" | "lazy";
+  fetchPriority?: "high" | "low" | "auto";
+  height?: number;
+  sizes?: string;
+  srcSet?: string;
+  width?: number;
 }) {
   if (failed) {
     return (
@@ -326,13 +354,20 @@ function PhotoImage({
   }
 
   return (
-    <img
-      alt={photo.title}
-      decoding="async"
-      onError={onError}
-      src={src}
-      style={{ aspectRatio: photo.aspectRatio }}
-    />
+    <picture className="pictures-browser__picture">
+      {srcSet ? <source sizes={sizes} srcSet={srcSet} type="image/webp" /> : null}
+      <img
+        alt={photo.title}
+        decoding="async"
+        fetchPriority={fetchPriority}
+        height={height}
+        loading={loading}
+        onError={onError}
+        src={src}
+        style={{ aspectRatio: photo.aspectRatio }}
+        width={width}
+      />
+    </picture>
   );
 }
 

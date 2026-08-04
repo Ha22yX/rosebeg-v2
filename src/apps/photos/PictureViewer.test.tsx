@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PictureViewer } from "@/apps/photos/PictureViewer";
+import { photos } from "@/content/photos";
 
 class ControlledResizeObserver {
   static instances: ControlledResizeObserver[] = [];
@@ -113,6 +114,40 @@ describe("PictureViewer", () => {
     expect(screen.getByText("100%")).toBeInTheDocument();
     expect(viewport).toHaveAttribute("data-zoom", "100");
     expect(screen.queryByRole("button", { name: "Actual size" })).not.toBeInTheDocument();
+  });
+
+  it("offers responsive WebP candidates with a JPEG fallback", () => {
+    const { container } = render(<PictureViewer initialSlug="stone-gate" />);
+    const photo = photos[0]!;
+    const source = container.querySelector<HTMLSourceElement>(
+      'picture source[type="image/webp"]',
+    );
+    const image = screen.getByRole("img", { name: "Stone Gate" });
+
+    expect(source).not.toBeNull();
+    expect(source).toHaveAttribute("srcset", photo.imageSrcSet);
+    expect(source).toHaveAttribute("sizes", "900px");
+    expect(image).toHaveAttribute("src", photo.imageSrc);
+    expect(image).toHaveAttribute("width", String(photo.imageWidth));
+    expect(image).toHaveAttribute("height", String(photo.imageHeight));
+  });
+
+  it("updates the responsive source size from fitted width through zoom", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<PictureViewer initialSlug="stone-gate" />);
+    const viewport = screen.getByLabelText("Photo viewport");
+    const image = screen.getByRole("img", { name: "Stone Gate" });
+    const source = container.querySelector<HTMLSourceElement>(
+      'picture source[type="image/webp"]',
+    );
+    expect(source).not.toBeNull();
+
+    loadImage(image);
+    resizeViewport(viewport, 800, 600);
+    expect(source).toHaveAttribute("sizes", "772px");
+
+    await user.click(screen.getByRole("button", { name: "Zoom in" }));
+    expect(source).toHaveAttribute("sizes", "965px");
   });
 
   it("zooms in from fitted 100% to 125%", async () => {
