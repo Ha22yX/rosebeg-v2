@@ -511,7 +511,7 @@ function ProjectDetail({
                 href={project.websiteUrl}
               >
                 <span aria-hidden="true" className="projects-explorer__shortcut-icon">▶</span>
-                <span>View demo</span>
+                <span>{project.websiteLabel ?? "View demo"}</span>
                 <span aria-hidden="true" className="projects-explorer__shortcut-external">↗</span>
               </ExternalLink>
             ) : null}

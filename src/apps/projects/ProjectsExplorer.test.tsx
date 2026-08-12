@@ -52,6 +52,21 @@ describe("ProjectsExplorer", () => {
     );
   });
 
+  it.each([
+    ["bridge-us-v2", "https://bridge-us.org/"],
+    ["onlypt-recruiting", "https://onlypt.co/"],
+  ])("labels %s as a website visit", (slug, href) => {
+    render(<ProjectsExplorer initialProjectSlug={slug} />);
+
+    expect(screen.getByRole("link", { name: "Visit Website" })).toHaveAttribute(
+      "href",
+      href,
+    );
+    expect(
+      screen.queryByRole("link", { name: "View demo" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("filters projects by name, kicker, category, and stack", async () => {
     const user = userEvent.setup();
     render(<ProjectsExplorer />);

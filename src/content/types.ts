@@ -17,6 +17,7 @@ export type Project = {
   stack: readonly string[];
   sourceUrl: string;
   websiteUrl?: string;
+  websiteLabel?: string;
   files: readonly ProjectFile[];
 };
 

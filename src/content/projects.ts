@@ -29,6 +29,7 @@ const projectCatalog = [
     stack: ["React", "FastAPI", "Tailwind", "AI Q&A"],
     sourceUrl: "https://github.com/Ha22yX/Bridge-US-V2",
     websiteUrl: "https://bridge-us.org/",
+    websiteLabel: "Visit Website",
     files: [
       { kind: "folder", name: "Bridge US V2" },
       { kind: "folder", name: "FrontEnd" },
@@ -176,6 +177,7 @@ const projectCatalog = [
     stack: ["Flask", "Jinja", "Vanilla CSS", "JavaScript", "CMS"],
     sourceUrl: "https://github.com/Ha22yX/onlypt-recruiting",
     websiteUrl: "https://onlypt.co/",
+    websiteLabel: "Visit Website",
     files: [
       { kind: "folder", name: "onlyPT Recruiting" },
       { kind: "folder", name: "templates" },
