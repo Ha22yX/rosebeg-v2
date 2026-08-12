@@ -103,7 +103,7 @@ describe("SystemRoot", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps the login shell and Harry account content while signing in", () => {
+  it("switches from the XP login shell to the DOS portfolio introduction", () => {
     render(
       <SystemRoot reducedMotion={false}>
         <div>Desktop child</div>
@@ -113,16 +113,15 @@ describe("SystemRoot", () => {
     act(() => vi.advanceTimersByTime(1_800));
 
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    expect(screen.getByTestId("login-header")).toBeInTheDocument();
-    expect(screen.getByTestId("login-main")).toBeInTheDocument();
-    expect(screen.getByTestId("login-footer")).toBeInTheDocument();
-    expect(screen.getByText("Harry")).toBeInTheDocument();
-    const intro = screen.getByTestId("login-intro");
-    expect(within(intro).getByText("Welcome")).toBeInTheDocument();
-    expect(within(intro).getByText("Loading your personal settings...")).toBeInTheDocument();
+    expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
+    expect(screen.queryByTestId("login-header")).not.toBeInTheDocument();
+    expect(screen.getByText("C:\\WINDOWS\\system32\\cmd.exe")).toBeInTheDocument();
+    expect(screen.getByLabelText("Rosebeg portfolio login introduction")).toHaveTextContent(
+      "Every project displayed here was independently developed by Zhiyuan Xing.",
+    );
   });
 
-  it("keeps normal sign-in visible for exactly 650 ms", () => {
+  it("keeps the normal DOS sign-in sequence visible for exactly 5200 ms", () => {
     render(
       <SystemRoot reducedMotion={false}>
         <DesktopControls />
@@ -131,7 +130,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(649));
+    act(() => vi.advanceTimersByTime(5_199));
     expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByRole("button", { name: "Log Off" })).toBeInTheDocument();
@@ -146,7 +145,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(5_200));
     fireEvent.click(screen.getByRole("button", { name: "Log Off" }));
     act(() => vi.advanceTimersByTime(449));
     expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
@@ -163,7 +162,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(5_200));
     fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
     act(() => vi.advanceTimersByTime(1_199));
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();

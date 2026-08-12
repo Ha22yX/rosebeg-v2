@@ -177,7 +177,7 @@ describe("DesktopShell", () => {
     if (!clock) throw new Error("Tray clock was not rendered");
 
     expect(clock).toHaveTextContent("34");
-    act(() => vi.advanceTimersByTime(57_549));
+    act(() => vi.advanceTimersByTime(52_999));
     expect(clock).toHaveTextContent("34");
     act(() => vi.advanceTimersByTime(1));
     expect(clock).toHaveTextContent("35");
@@ -390,7 +390,7 @@ describe("DesktopShell", () => {
     act(() => vi.advanceTimersByTime(450));
     expect(screen.getByTestId("login-screen")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(5_200));
 
     expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
     expect(
@@ -453,7 +453,7 @@ function renderDesktop() {
 
   act(() => vi.advanceTimersByTime(1_800));
   fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-  act(() => vi.advanceTimersByTime(650));
+  act(() => vi.advanceTimersByTime(5_200));
   expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
   return result;
 }

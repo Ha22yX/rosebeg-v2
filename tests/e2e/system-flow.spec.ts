@@ -14,6 +14,34 @@ test("boots, logs in, and logs off", async ({ page }) => {
   await expect(page.getByTestId("login-screen")).toBeVisible();
 });
 
+test("finishes the DOS ownership message before entering the desktop", async ({ page }) => {
+  await page.clock.install({
+    time: new Date("2026-08-12T12:00:00.000Z"),
+  });
+  await page.clock.pauseAt(new Date("2026-08-12T12:00:00.000Z"));
+  await page.goto("/");
+
+  await page.clock.fastForward(1_800);
+  await expect(page.getByTestId("login-screen")).toBeVisible();
+  await page.getByRole("button", { name: "Harry", exact: true }).click();
+
+  const dosScreen = page.getByTestId("signing-in-screen");
+  await expect(dosScreen).toBeVisible();
+  await expect(page.getByText("Log In", { exact: true })).toHaveCount(0);
+
+  await page.clock.runFor(4_000);
+  await expect(page.getByTestId("dos-transcript")).toContainText(
+    "This website was independently designed and developed by Zhiyuan Xing.",
+  );
+  await expect(page.getByText("Log In", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("desktop-shell")).toHaveCount(0);
+
+  await page.clock.runFor(1_199);
+  await expect(dosScreen).toBeVisible();
+  await page.clock.runFor(1);
+  await expect(page.getByTestId("desktop-shell")).toBeVisible();
+});
+
 test("restores open and maximized windows after a page refresh", async ({ page }) => {
   await page.goto("/");
   await loginToDesktop(page);

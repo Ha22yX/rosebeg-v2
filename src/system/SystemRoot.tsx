@@ -13,6 +13,7 @@ import {
   readDesktopSession,
 } from "@/persistence/desktop-session";
 import { BootScreen } from "@/system/BootScreen";
+import { DosLoginScreen } from "@/system/DosLoginScreen";
 import { LoginScreen } from "@/system/LoginScreen";
 import { PowerScreen } from "@/system/PowerScreen";
 import { usePrefersReducedMotion } from "@/shared/usePrefersReducedMotion";
@@ -65,7 +66,7 @@ export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
 
     const normalDelayByPhase = {
       booting: 1_800,
-      "signing-in": 650,
+      "signing-in": 5_200,
       "logging-off": 450,
       "shutting-down": 1_200,
     } as const;
@@ -112,7 +113,7 @@ export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
       content = <LoginScreen onSelectAccount={selectAccount} />;
       break;
     case "signing-in":
-      content = <LoginScreen onSelectAccount={selectAccount} signingIn />;
+      content = <DosLoginScreen reducedMotion={prefersReducedMotion} />;
       break;
     case "desktop":
       content = children;

@@ -1,18 +1,14 @@
 import { RosebegXpLogo } from "@/system/RosebegXpLogo";
 
 type LoginScreenProps = {
-  signingIn?: boolean;
   onSelectAccount: () => void;
 };
 
-export function LoginScreen({
-  signingIn = false,
-  onSelectAccount,
-}: LoginScreenProps) {
+export function LoginScreen({ onSelectAccount }: LoginScreenProps) {
   return (
     <section
       className="system-screen login-screen"
-      data-testid={signingIn ? "signing-in-screen" : "login-screen"}
+      data-testid="login-screen"
     >
       <header aria-hidden="true" className="login-header" data-testid="login-header">
         <span className="login-header__accent" />
@@ -20,22 +16,11 @@ export function LoginScreen({
       <main className="login-main" data-testid="login-main">
         <div className="login-panel">
           <div className="login-intro" data-testid="login-intro">
-            {signingIn ? (
-              <>
-                <p className="login-heading">Welcome</p>
-                <p className="system-status">Loading your personal settings...</p>
-              </>
-            ) : (
-              <>
-                <RosebegXpLogo compact inverse />
-                <p>To begin, click your user name</p>
-              </>
-            )}
+            <RosebegXpLogo compact inverse />
+            <p>To begin, click your user name</p>
           </div>
           <button
-            aria-pressed={signingIn || undefined}
-            className={`account-button${signingIn ? " account-button--selected" : ""}`}
-            disabled={signingIn}
+            className="account-button"
             onClick={onSelectAccount}
             type="button"
           >

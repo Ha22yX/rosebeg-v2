@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import { loginToDesktop } from "./helpers";
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
@@ -26,9 +25,12 @@ for (const viewport of viewports) {
       timeout: 3_000,
     });
     await capture(page, `${viewport.name}-login.png`);
+    await page.getByRole("button", { name: "Harry", exact: true }).click();
+    await expect(page.getByTestId("signing-in-screen")).toBeVisible();
+    await capture(page, `${viewport.name}-dos-login.png`);
+    await page.clock.fastForward(150);
+    await expect(page.getByTestId("desktop-shell")).toBeVisible();
     await page.clock.resume();
-
-    await loginToDesktop(page);
     await capture(page, `${viewport.name}-desktop.png`);
 
     await openStart(page);
