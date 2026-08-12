@@ -2,6 +2,10 @@ import { act } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SystemRoot, useSystemActions } from "@/system/SystemRoot";
+import {
+  DOS_LOGIN_READING_HOLD_MS,
+  DOS_SIGN_IN_DURATION_MS,
+} from "@/system/DosLoginScreen";
 
 function DesktopControls() {
   const { requestLogOff, requestTurnOff } = useSystemActions();
@@ -121,7 +125,7 @@ describe("SystemRoot", () => {
     );
   });
 
-  it("keeps the normal DOS sign-in sequence visible for exactly 5200 ms", () => {
+  it("keeps the DOS screen through typing and five seconds of reading", () => {
     render(
       <SystemRoot reducedMotion={false}>
         <DesktopControls />
@@ -130,7 +134,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(5_199));
+    act(() => vi.advanceTimersByTime(DOS_SIGN_IN_DURATION_MS - 1));
     expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByRole("button", { name: "Log Off" })).toBeInTheDocument();
@@ -145,7 +149,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(5_200));
+    act(() => vi.advanceTimersByTime(DOS_SIGN_IN_DURATION_MS));
     fireEvent.click(screen.getByRole("button", { name: "Log Off" }));
     act(() => vi.advanceTimersByTime(449));
     expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
@@ -162,7 +166,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(1_800));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(5_200));
+    act(() => vi.advanceTimersByTime(DOS_SIGN_IN_DURATION_MS));
     fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
     act(() => vi.advanceTimersByTime(1_199));
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
@@ -170,7 +174,7 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("powered-off-screen")).toBeInTheDocument();
   });
 
-  it("uses exactly 150 ms for every reduced-motion timed phase", () => {
+  it("keeps the five-second reading hold when motion is reduced", () => {
     render(
       <SystemRoot reducedMotion>
         <DesktopControls />
@@ -181,7 +185,7 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("boot-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(149));
+    act(() => vi.advanceTimersByTime(DOS_LOGIN_READING_HOLD_MS - 1));
     expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     fireEvent.click(screen.getByRole("button", { name: "Log Off" }));
@@ -189,7 +193,7 @@ describe("SystemRoot", () => {
     expect(screen.getByTestId("logging-off-screen")).toBeInTheDocument();
     act(() => vi.advanceTimersByTime(1));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(150));
+    act(() => vi.advanceTimersByTime(DOS_LOGIN_READING_HOLD_MS));
     fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
     act(() => vi.advanceTimersByTime(149));
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();
@@ -210,7 +214,7 @@ describe("SystemRoot", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
     expect(screen.getByTestId("signing-in-screen")).toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(150));
+    act(() => vi.advanceTimersByTime(DOS_LOGIN_READING_HOLD_MS));
 
     expect(screen.getByText("Desktop child")).toBeInTheDocument();
   });
@@ -224,7 +228,7 @@ describe("SystemRoot", () => {
 
     act(() => vi.advanceTimersByTime(150));
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(150));
+    act(() => vi.advanceTimersByTime(DOS_LOGIN_READING_HOLD_MS));
 
     fireEvent.click(screen.getByRole("button", { name: "Turn Off" }));
     expect(screen.getByTestId("shutting-down-screen")).toBeInTheDocument();

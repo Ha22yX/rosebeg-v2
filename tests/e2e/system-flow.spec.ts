@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { loginToDesktop } from "./helpers";
+import {
+  DOS_LOGIN_READING_HOLD_MS,
+  DOS_TYPING_DURATION_MS,
+} from "../../src/system/DosLoginScreen";
 
 test("boots, logs in, and logs off", async ({ page }) => {
   await page.goto("/");
@@ -27,16 +31,34 @@ test("finishes the DOS ownership message before entering the desktop", async ({ 
 
   const dosScreen = page.getByTestId("signing-in-screen");
   await expect(dosScreen).toBeVisible();
+  const initialWindowWidth = await dosScreen.locator(".dos-window").evaluate(
+    (terminal) => terminal.getBoundingClientRect().width,
+  );
+  expect(initialWindowWidth).toBeGreaterThan(0);
   await expect(page.getByText("Log In", { exact: true })).toHaveCount(0);
 
   await page.clock.runFor(4_000);
+  await expect(page.getByTestId("dos-transcript")).not.toContainText(
+    "Portfolio verification complete.",
+  );
+  await expect(page.getByText("Log In", { exact: true })).toHaveCount(0);
+  const partialWindowWidth = await dosScreen.locator(".dos-window").evaluate(
+    (terminal) => terminal.getBoundingClientRect().width,
+  );
+  expect(partialWindowWidth).toBe(initialWindowWidth);
+
+  await page.clock.runFor(DOS_TYPING_DURATION_MS - 4_000);
   await expect(page.getByTestId("dos-transcript")).toContainText(
     "This website was independently designed and developed by Zhiyuan Xing.",
   );
   await expect(page.getByText("Log In", { exact: true })).toBeVisible();
   await expect(page.getByTestId("desktop-shell")).toHaveCount(0);
+  const completedWindowWidth = await dosScreen.locator(".dos-window").evaluate(
+    (terminal) => terminal.getBoundingClientRect().width,
+  );
+  expect(completedWindowWidth).toBe(initialWindowWidth);
 
-  await page.clock.runFor(1_199);
+  await page.clock.runFor(DOS_LOGIN_READING_HOLD_MS - 1);
   await expect(dosScreen).toBeVisible();
   await page.clock.runFor(1);
   await expect(page.getByTestId("desktop-shell")).toBeVisible();

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "@/app/App";
+import { DOS_SIGN_IN_DURATION_MS } from "@/system/DosLoginScreen";
 
 beforeAll(() => {
   class TestPointerEvent extends MouseEvent {
@@ -177,7 +178,8 @@ describe("DesktopShell", () => {
     if (!clock) throw new Error("Tray clock was not rendered");
 
     expect(clock).toHaveTextContent("34");
-    act(() => vi.advanceTimersByTime(52_999));
+    const remainingMinuteMs = 60_000 - 1_800 - DOS_SIGN_IN_DURATION_MS;
+    act(() => vi.advanceTimersByTime(remainingMinuteMs - 1));
     expect(clock).toHaveTextContent("34");
     act(() => vi.advanceTimersByTime(1));
     expect(clock).toHaveTextContent("35");
@@ -390,7 +392,7 @@ describe("DesktopShell", () => {
     act(() => vi.advanceTimersByTime(450));
     expect(screen.getByTestId("login-screen")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-    act(() => vi.advanceTimersByTime(5_200));
+    act(() => vi.advanceTimersByTime(DOS_SIGN_IN_DURATION_MS));
 
     expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
     expect(
@@ -453,7 +455,7 @@ function renderDesktop() {
 
   act(() => vi.advanceTimersByTime(1_800));
   fireEvent.click(screen.getByRole("button", { name: "Harry" }));
-  act(() => vi.advanceTimersByTime(5_200));
+  act(() => vi.advanceTimersByTime(DOS_SIGN_IN_DURATION_MS));
   expect(screen.getByTestId("desktop-shell")).toBeInTheDocument();
   return result;
 }

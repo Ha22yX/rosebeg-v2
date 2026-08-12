@@ -15,8 +15,25 @@ const DOS_TRANSCRIPT = [
   "Portfolio verification complete.",
 ].join("\n");
 
-const TYPE_INTERVAL_MS = 24;
-const CHARACTERS_PER_TICK = 3;
+const TYPING_RHYTHM_MS = [18, 26, 21, 34, 17, 24, 29] as const;
+
+export const DOS_LOGIN_READING_HOLD_MS = 5_000;
+
+function getTypingDelayMs(character: string, index: number): number {
+  if (character === "\n") return 210;
+  if (/[.!?]/.test(character)) return 160;
+  if (/[,;:]/.test(character)) return 90;
+  if (character === " ") return 14;
+  return TYPING_RHYTHM_MS[index % TYPING_RHYTHM_MS.length];
+}
+
+export const DOS_TYPING_DURATION_MS = Array.from(DOS_TRANSCRIPT).reduce(
+  (duration, character, index) => duration + getTypingDelayMs(character, index),
+  0,
+);
+
+export const DOS_SIGN_IN_DURATION_MS =
+  DOS_TYPING_DURATION_MS + DOS_LOGIN_READING_HOLD_MS;
 
 type DosLoginScreenProps = {
   reducedMotion: boolean;
@@ -33,16 +50,37 @@ export function DosLoginScreen({ reducedMotion }: DosLoginScreenProps) {
       return;
     }
 
-    setVisibleCharacters(0);
-    const intervalId = window.setInterval(() => {
-      setVisibleCharacters((current) => {
-        const next = Math.min(current + CHARACTERS_PER_TICK, DOS_TRANSCRIPT.length);
-        if (next === DOS_TRANSCRIPT.length) window.clearInterval(intervalId);
-        return next;
-      });
-    }, TYPE_INTERVAL_MS);
+    let nextCharacterIndex = 0;
+    let timeoutId = 0;
+    let cancelled = false;
 
-    return () => window.clearInterval(intervalId);
+    const typeNextCharacter = () => {
+      if (cancelled) return;
+
+      nextCharacterIndex += 1;
+      setVisibleCharacters(nextCharacterIndex);
+
+      if (nextCharacterIndex < DOS_TRANSCRIPT.length) {
+        timeoutId = window.setTimeout(
+          typeNextCharacter,
+          getTypingDelayMs(
+            DOS_TRANSCRIPT[nextCharacterIndex],
+            nextCharacterIndex,
+          ),
+        );
+      }
+    };
+
+    setVisibleCharacters(0);
+    timeoutId = window.setTimeout(
+      typeNextCharacter,
+      getTypingDelayMs(DOS_TRANSCRIPT[0], 0),
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [reducedMotion]);
 
   const transcriptComplete = visibleCharacters === DOS_TRANSCRIPT.length;

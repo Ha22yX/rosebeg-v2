@@ -13,7 +13,11 @@ import {
   readDesktopSession,
 } from "@/persistence/desktop-session";
 import { BootScreen } from "@/system/BootScreen";
-import { DosLoginScreen } from "@/system/DosLoginScreen";
+import {
+  DOS_LOGIN_READING_HOLD_MS,
+  DOS_SIGN_IN_DURATION_MS,
+  DosLoginScreen,
+} from "@/system/DosLoginScreen";
 import { LoginScreen } from "@/system/LoginScreen";
 import { PowerScreen } from "@/system/PowerScreen";
 import { usePrefersReducedMotion } from "@/shared/usePrefersReducedMotion";
@@ -66,12 +70,14 @@ export function SystemRoot({ children, reducedMotion }: SystemRootProps) {
 
     const normalDelayByPhase = {
       booting: 1_800,
-      "signing-in": 5_200,
+      "signing-in": DOS_SIGN_IN_DURATION_MS,
       "logging-off": 450,
       "shutting-down": 1_200,
     } as const;
     const transitionDelay = prefersReducedMotion
-      ? 150
+      ? state.phase === "signing-in"
+        ? DOS_LOGIN_READING_HOLD_MS
+        : 150
       : normalDelayByPhase[state.phase as keyof typeof normalDelayByPhase];
     const timeoutId = window.setTimeout(() => dispatch(event), transitionDelay);
     return () => window.clearTimeout(timeoutId);

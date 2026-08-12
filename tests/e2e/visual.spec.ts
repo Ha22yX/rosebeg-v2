@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { DOS_LOGIN_READING_HOLD_MS } from "../../src/system/DosLoginScreen";
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
@@ -28,7 +29,7 @@ for (const viewport of viewports) {
     await page.getByRole("button", { name: "Harry", exact: true }).click();
     await expect(page.getByTestId("signing-in-screen")).toBeVisible();
     await capture(page, `${viewport.name}-dos-login.png`);
-    await page.clock.fastForward(150);
+    await page.clock.fastForward(DOS_LOGIN_READING_HOLD_MS);
     await expect(page.getByTestId("desktop-shell")).toBeVisible();
     await page.clock.resume();
     await capture(page, `${viewport.name}-desktop.png`);
