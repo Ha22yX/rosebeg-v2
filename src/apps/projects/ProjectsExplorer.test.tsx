@@ -9,7 +9,7 @@ describe("ProjectsExplorer", () => {
     const user = userEvent.setup();
     render(<ProjectsExplorer />);
 
-    expect(screen.getByText("9 objects")).toBeInTheDocument();
+    expect(screen.getByText(`${projects.length} objects`)).toBeInTheDocument();
     for (const project of projects) {
       expect(
         screen.getByRole("button", { name: `${project.name} folder` }),
@@ -202,7 +202,7 @@ describe("ProjectsExplorer", () => {
     expect(up).toBeEnabled();
 
     await user.click(back);
-    expect(screen.getByText("9 objects")).toBeInTheDocument();
+    expect(screen.getByText(`${projects.length} objects`)).toBeInTheDocument();
     expect(forward).toBeEnabled();
     expect(up).toBeDisabled();
 
@@ -237,7 +237,7 @@ describe("ProjectsExplorer", () => {
       screen.getByRole("dialog", { name: "Windows Explorer" }),
     ).toHaveTextContent("The project folder could not be found.");
     expect(screen.getByLabelText("Address")).toHaveValue("C:\\My Projects");
-    expect(screen.getByText("9 objects")).toBeInTheDocument();
+    expect(screen.getByText(`${projects.length} objects`)).toBeInTheDocument();
   });
 
   it("makes the invalid-project warning modal and restores its invoker", async () => {

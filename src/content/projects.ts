@@ -1,6 +1,6 @@
 import type { Project } from "@/content/types";
 
-export const projects = [
+const projectCatalog = [
   {
     slug: "auto-email-system",
     name: "Auto Email System",
@@ -135,9 +135,9 @@ export const projects = [
   {
     slug: "dayvault",
     name: "DayVault",
-    kicker: "All-Day Voice Logger",
-    tagline: "A compact all-day voice logger designed around low-power recording, dual digital microphones, removable storage, and dependable timekeeping.",
-    story: "DayVault turns a complete embedded audio-capture concept into documented hardware: STM32L452 control, two PDM microphones, microSD storage, USB-C, and an RTC in a compact wearable-oriented design.",
+    kicker: "Personal Life-Archive Recorder",
+    tagline: "An ultra-low-power microphone designed to capture an entire day, then recharge and transfer its recordings automatically when connected to a computer.",
+    story: "AI has become powerful enough that a personal record of every day no longer feels impossible. I built DayVault to collect what I say with almost no daily friction: carry it all day, plug it in at night to charge and offload the audio, then eventually transcribe the files and use a language model to summarize the day. The long-term goal is an archive of my life, one ordinary day at a time.",
     category: "electronics",
     stack: ["STM32L452", "dual PDM microphones", "microSD", "USB-C", "RTC"],
     sourceUrl: "https://github.com/Ha22yX/DayVault",
@@ -152,9 +152,9 @@ export const projects = [
   {
     slug: "gridopoly",
     name: "Gridopoly",
-    kicker: "Modular Smart Board Platform",
-    tagline: "A modular electronic board-game platform made from rearrangeable smart tiles that sense pieces, display state, and communicate over a shared bus.",
-    story: "Each tile combines RFID, a color display, addressable light, and RS485 networking around an ESP32-S3 so physical board layouts can become programmable game systems.",
+    kicker: "Cashless Smart Board",
+    tagline: "A modular electronic board-game platform inspired by a Monopoly night with friends, designed to make transactions faster without losing the physical tabletop experience.",
+    story: "While traveling with friends one summer, I noticed that counting cash and handling every transaction kept interrupting the game. I came home wondering whether I could build a fully electronic board myself, then started defining the product and drawing its circuit boards. Gridopoly turns that idea into programmable smart tiles with RFID, color displays, lighting, and shared networking.",
     category: "electronics",
     stack: ["ESP32-S3", "RS485", "125 kHz RFID", "ST7789", "addressable LEDs"],
     sourceUrl: "https://github.com/Ha22yX/Gridopoly",
@@ -166,4 +166,42 @@ export const projects = [
       { kind: "shortcut", name: "github.url", href: "https://github.com/Ha22yX/Gridopoly" },
     ],
   },
+  {
+    slug: "onlypt-recruiting",
+    name: "onlyPT Recruiting",
+    kicker: "Pro-Bono Business Website",
+    tagline: "A polished recruiting website and lightweight CMS I designed and built free of charge for my church's Youth Pastor and his independent physical-therapy recruiting business.",
+    story: "My Youth Pastor is also a physical-therapy recruiter and a close friend. One evening at his house, he showed me the business website he had made himself. I joked that it looked terrible and offered to build him a better one for free. I started the next night and spent more than a month shaping every page and detail by hand. Seeing how excited he was, and watching the finished site bring him real business, made this one of my most personally rewarding projects.",
+    category: "software",
+    stack: ["Flask", "Jinja", "Vanilla CSS", "JavaScript", "CMS"],
+    sourceUrl: "https://github.com/Ha22yX/onlypt-recruiting",
+    websiteUrl: "https://onlypt.co/",
+    files: [
+      { kind: "folder", name: "onlyPT Recruiting" },
+      { kind: "folder", name: "templates" },
+      { kind: "folder", name: "static" },
+      { kind: "file", label: "PY", name: "app.py" },
+      { kind: "shortcut", label: "WEB", name: "onlypt.co", href: "https://onlypt.co/" },
+      { kind: "shortcut", label: "URL", name: "github.url", href: "https://github.com/Ha22yX/onlypt-recruiting" },
+    ],
+  },
 ] satisfies readonly Project[];
+
+const projectOrder = [
+  "gridopoly",
+  "onlypt-recruiting",
+  "dayvault",
+  "bridge-us-v2",
+  "esp32-sound-radar",
+  "mother-ship-docking-drone-system",
+  "auto-email-system",
+  "photoback",
+  "sat-ai-tutor",
+  "dxf-auto-shape-tool",
+] as const;
+
+export const projects = projectOrder.map((slug) => {
+  const project = projectCatalog.find((candidate) => candidate.slug === slug);
+  if (!project) throw new Error(`Unknown portfolio project: ${slug}`);
+  return project;
+}) satisfies readonly Project[];
